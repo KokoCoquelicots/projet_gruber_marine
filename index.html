@@ -1,11 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulaire d'inscription</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>Welcome to my website!</p>
+
+  <div class="container">
+
+    <!-- ===== Formulaire d'inscription ===== -->
+    <form id="inscriptionForm" novalidate>
+      <h1>Inscription</h1>
+
+      <div id="errorMessage" class="error-message" aria-live="polite"></div>
+
+      <div class="form-group">
+        <label for="login">Login</label>
+        <input type="text" id="login" name="login" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmation du mot de passe</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input type="text" id="nom" name="nom" required>
+      </div>
+
+      <div class="form-group">
+        <label for="prenom">Prénom</label>
+        <input type="text" id="prenom" name="prenom" required>
+      </div>
+
+      <div class="form-group">
+        <label for="adresse">Adresse</label>
+        <input type="text" id="adresse" name="adresse" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="telephone">Téléphone</label>
+        <input type="text" id="telephone" name="telephone" required>
+      </div>
+
+      <div class="form-group">
+        <label for="dateNaissance">Date de naissance</label>
+        <input type="date" id="dateNaissance" name="dateNaissance" required>
+      </div>
+
+      <button type="submit" class="btn-submit">S'inscrire</button>
+    </form>
+
+    <!-- ===== Page récapitulative (masquée au départ) ===== -->
+    <div id="recap" class="recap hidden">
+      <h1>Récapitulatif de l'inscription</h1>
+      <p>Votre inscription a bien été enregistrée. Voici le résumé de vos informations :</p>
+
+      <ul class="recap-list">
+        <li><span>Login :</span> <span id="recapLogin"></span></li>
+        <li><span>Nom :</span> <span id="recapNom"></span></li>
+        <li><span>Prénom :</span> <span id="recapPrenom"></span></li>
+        <li><span>Adresse :</span> <span id="recapAdresse"></span></li>
+        <li><span>Email :</span> <span id="recapEmail"></span></li>
+        <li><span>Téléphone :</span> <span id="recapTelephone"></span></li>
+        <li><span>Date de naissance :</span> <span id="recapDateNaissance"></span></li>
+      </ul>
+
+      <button type="button" id="retourBtn" class="btn-submit">Retour au formulaire</button>
+    </div>
+
+  </div>
+
+<script src="script.js"></script>
 </body>
 </html>

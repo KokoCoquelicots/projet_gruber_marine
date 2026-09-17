@@ -1,0 +1,152 @@
+/* ===== Réinitialisation de base ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #6a89cc, #4a69bd);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* ===== Conteneur principal ===== */
+.container {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* ===== Formulaire ===== */
+form {
+  background: #ffffff;
+  padding: 35px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+form h1,
+.recap h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.6rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #34495e;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  padding: 10px 12px;
+  border: 1px solid #ccd6e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4a69bd;
+  box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.2);
+}
+
+.form-group input.invalid {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+}
+
+/* ===== Bouton ===== */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #4a69bd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-submit:hover {
+  background-color: #3c56a0;
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+/* ===== Message d'erreur ===== */
+.error-message {
+  display: none;
+  background-color: #fdecea;
+  color: #c0392b;
+  border: 1px solid #f5b7b1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.error-message.show {
+  display: block;
+}
+
+/* ===== Page récapitulative ===== */
+.recap {
+  background: #ffffff;
+  padding: 35px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.recap p {
+  text-align: center;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.recap-list {
+  list-style: none;
+}
+
+.recap-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eaeef2;
+  font-size: 0.95rem;
+}
+
+.recap-list li span:first-child {
+  font-weight: 600;
+  color: #34495e;
+}
+
+.recap-list li span:last-child {
+  color: #2c3e50;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ===== Utilitaire ===== */
+.hidden {
+  display: none;
+}
