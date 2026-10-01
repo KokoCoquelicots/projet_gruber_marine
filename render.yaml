@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: atelier-inscription
+    runtime: static
+    buildCommand: cd ex01 && npm ci && npm run build
+    staticPublishPath: ./ex01/dist/ex01/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
