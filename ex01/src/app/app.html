@@ -1,0 +1,123 @@
+<main class="min-h-screen bg-[#f7f7f2] text-[#17211c] md:grid md:grid-cols-[0.9fr_1.1fr]">
+  <aside class="relative isolate hidden min-h-screen overflow-hidden bg-[#173d32] text-white md:flex md:flex-col md:justify-between md:px-12 md:py-10 lg:px-16">
+    <img
+      class="absolute inset-0 -z-20 h-full w-full object-cover"
+      src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85"
+      alt="Espace de travail lumineux"
+    />
+    <div class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(13,42,33,0.74)_0%,rgba(17,57,45,0.52)_42%,rgba(13,42,33,0.92)_100%)]"></div>
+
+    <a class="flex w-fit items-center gap-3 text-sm font-semibold tracking-[0.08em]" href="#accueil" aria-label="Atelier, accueil">
+      <span class="grid size-9 place-items-center border border-white/40 text-lg font-serif">A</span>
+      <span>ATELIER <span class="font-normal text-white/60">/ 01</span></span>
+    </a>
+
+    <div class="max-w-lg pb-5 motion-safe:animate-[rise-in_700ms_ease-out_both]">
+      <p class="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#d5e09d]">Un nouvel espace, à vous</p>
+      <h1 class="font-serif text-5xl leading-[1.05] tracking-normal lg:text-6xl">Les bonnes idées commencent quelque part.</h1>
+      <p class="mt-6 max-w-sm text-base leading-7 text-white/75">Créez votre compte et donnez vie à votre prochain projet.</p>
+    </div>
+
+    <div class="flex items-center justify-between border-t border-white/25 pt-5 text-xs text-white/65">
+      <span>Un espace pour vos projets</span>
+      <span>01 — 06</span>
+    </div>
+  </aside>
+
+  <section id="accueil" class="flex min-h-screen flex-col px-5 py-7 sm:px-10 md:px-12 md:py-10 lg:px-20">
+    <header class="flex items-center justify-between md:justify-end">
+      <a class="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] md:hidden" href="#accueil">
+        <span class="grid size-8 place-items-center border border-[#173d32]/25 font-serif text-lg">A</span>
+        ATELIER <span class="font-normal text-[#657069]">/ 01</span>
+      </a>
+      <p class="text-sm text-[#657069]">Déjà inscrit ? <a class="font-semibold text-[#a84d32] underline decoration-[#a84d32]/40 underline-offset-4" href="#connexion">Se connecter</a></p>
+    </header>
+
+    <div class="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center py-10 md:py-12">
+      <div class="mb-8 motion-safe:animate-[rise-in_700ms_ease-out_both]">
+        <p class="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-[#a84d32]">Créer un compte</p>
+        <h2 class="font-serif text-4xl leading-tight tracking-normal sm:text-5xl">Votre espace commence ici.</h2>
+        <p class="mt-3 text-sm leading-6 text-[#657069]">Quelques informations et c’est parti.</p>
+      </div>
+
+      @if (submitted) {
+        <div class="mb-6 border-l-4 border-[#52745e] bg-[#eaf0e8] px-4 py-3 text-sm text-[#244632]" role="status">
+          Votre compte est prêt. Bienvenue chez Atelier.
+        </div>
+      }
+
+      <form #registrationForm="ngForm" (ngSubmit)="onSubmit(registrationForm)" novalidate class="space-y-5">
+        <div>
+          <label for="login" class="mb-2 block text-sm font-semibold">Login <span class="text-[#a84d32]">*</span></label>
+          <input id="login" name="login" type="text" [(ngModel)]="formData.login" #loginControl="ngModel" required autocomplete="username" placeholder="Votre identifiant" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+          @if (loginControl.invalid && (loginControl.touched || registrationForm.submitted)) {
+            <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Veuillez saisir un identifiant.</p>
+          }
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="password" class="mb-2 block text-sm font-semibold">Mot de passe <span class="text-[#a84d32]">*</span></label>
+            <input id="password" name="password" type="password" [(ngModel)]="formData.password" #passwordControl="ngModel" required autocomplete="new-password" placeholder="••••••••" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+            @if (passwordControl.invalid && (passwordControl.touched || registrationForm.submitted)) {
+              <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Veuillez saisir un mot de passe.</p>
+            }
+          </div>
+          <div>
+            <label for="passwordConfirmation" class="mb-2 block text-sm font-semibold">Confirmation <span class="text-[#a84d32]">*</span></label>
+            <input id="passwordConfirmation" name="passwordConfirmation" type="password" [(ngModel)]="formData.passwordConfirmation" #confirmationControl="ngModel" required autocomplete="new-password" placeholder="Répétez le mot de passe" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+            @if (confirmationControl.invalid && (confirmationControl.touched || registrationForm.submitted)) {
+              <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Veuillez confirmer votre mot de passe.</p>
+            } @else if (confirmationControl.touched && formData.passwordConfirmation !== formData.password) {
+              <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Les mots de passe ne correspondent pas.</p>
+            }
+          </div>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="lastName" class="mb-2 block text-sm font-semibold">Nom <span class="text-[#a84d32]">*</span></label>
+            <input id="lastName" name="lastName" type="text" [(ngModel)]="formData.lastName" #lastNameControl="ngModel" required autocomplete="family-name" placeholder="Votre nom" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+            @if (lastNameControl.invalid && (lastNameControl.touched || registrationForm.submitted)) {
+              <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Veuillez saisir votre nom.</p>
+            }
+          </div>
+          <div>
+            <label for="firstName" class="mb-2 block text-sm font-semibold">Prénom <span class="text-[#a84d32]">*</span></label>
+            <input id="firstName" name="firstName" type="text" [(ngModel)]="formData.firstName" #firstNameControl="ngModel" required autocomplete="given-name" placeholder="Votre prénom" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+            @if (firstNameControl.invalid && (firstNameControl.touched || registrationForm.submitted)) {
+              <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">Veuillez saisir votre prénom.</p>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="mb-2 block text-sm font-semibold">Email <span class="text-[#a84d32]">*</span></label>
+          <input id="email" name="email" type="email" [(ngModel)]="formData.email" #emailControl="ngModel" required email autocomplete="email" placeholder="vous@exemple.fr" class="w-full border border-[#d8ddd5] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9ba39c] focus:border-[#52745e] focus:ring-2 focus:ring-[#52745e]/15" />
+          @if (emailControl.invalid && (emailControl.touched || registrationForm.submitted)) {
+            <p class="mt-1.5 text-xs text-[#a33e31]" role="alert">
+              @if (emailControl.errors?.['required']) {
+                Veuillez saisir votre adresse email.
+              } @else {
+                Veuillez saisir une adresse email valide.
+              }
+            </p>
+          }
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" [disabled]="registrationForm.invalid || formData.password !== formData.passwordConfirmation" class="flex w-full items-center justify-between bg-[#173d32] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#245442] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173d32] disabled:cursor-not-allowed disabled:bg-[#aab4aa]">
+            <span>Créer mon compte</span>
+            <span aria-hidden="true" class="text-lg">→</span>
+          </button>
+          <p class="mt-4 text-center text-xs leading-5 text-[#7c857e]">En continuant, vous acceptez nos conditions d’utilisation.</p>
+        </div>
+      </form>
+    </div>
+
+    <footer class="flex justify-between border-t border-[#e0e3dc] pt-4 text-xs text-[#879088]">
+      <span>Atelier © 2026</span>
+      <a class="transition hover:text-[#173d32]" href="#confidentialite">Confidentialité</a>
+    </footer>
+  </section>
+</main>
