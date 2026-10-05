@@ -1,0 +1,45 @@
+<article class="summary" aria-label="Récapitulatif de la déclaration">
+  <div class="summary-title-row">
+    <div>
+      <p class="summary-kicker">VOTRE SIGNALEMENT</p>
+      <h3>{{ declaration.title }}</h3>
+    </div>
+    <span class="type-tag">{{ declaration.type }}</span>
+  </div>
+
+  <p class="description">{{ declaration.description }}</p>
+
+  <dl class="details-grid">
+    <div class="detail">
+      <dt>Date de l’observation</dt>
+      <dd>{{ declaration.observedAt }}</dd>
+    </div>
+    <div class="detail">
+      <dt>Lieu</dt>
+      <dd>{{ declaration.location }}</dd>
+    </div>
+    <div class="detail">
+      <dt>Latitude</dt>
+      <dd>{{ declaration.latitude }}</dd>
+    </div>
+    <div class="detail">
+      <dt>Longitude</dt>
+      <dd>{{ declaration.longitude }}</dd>
+    </div>
+    <div class="detail detail-full">
+      <dt>Photo</dt>
+      @if (declaration.photoUrl) {
+        <dd><a [href]="declaration.photoUrl" target="_blank" rel="noopener noreferrer">{{ declaration.photoUrl }}</a></dd>
+      } @else {
+        <dd class="not-provided">Aucune photo fournie</dd>
+      }
+    </div>
+  </dl>
+
+  @if (declaration.photoUrl) {
+    <figure class="photo-preview">
+      <img [src]="declaration.photoUrl" [alt]="'Photo de ' + declaration.title" loading="lazy">
+      <figcaption>Photographie jointe au signalement</figcaption>
+    </figure>
+  }
+</article>

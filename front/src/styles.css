@@ -1,0 +1,36 @@
+* {
+	box-sizing: border-box;
+}
+
+html {
+	min-width: 320px;
+	min-height: 100%;
+	background: #f5f6f0;
+}
+
+body {
+	min-width: 320px;
+	min-height: 100vh;
+	margin: 0;
+	color: #263d34;
+	font-family: "Aptos", "Segoe UI", sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible {
+	outline: 3px solid #d2784d;
+	outline-offset: 3px;
+}
+
+::selection {
+	background: #dce9bf;
+	color: #173b34;
+}

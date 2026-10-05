@@ -1,4 +1,4 @@
-# Ex01
+# Front
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.24.
 
@@ -35,23 +35,6 @@ ng build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Déploiement sur Render
-
-Le fichier `render.yaml`, situé à la racine du dépôt, configure le déploiement du site Angular comme site statique.
-
-1. Poussez le dépôt sur GitHub.
-2. Dans Render, choisissez **New > Blueprint** et connectez ce dépôt.
-3. Render lit `render.yaml`, installe les dépendances dans `ex01/`, lance le build de production et publie `ex01/dist/ex01/browser`.
-
-Le Blueprint configure aussi une réécriture vers `index.html` pour que les routes Angular fonctionnent après un rechargement de page. Chaque nouveau push sur la branche déployée déclenchera ensuite un nouveau déploiement.
-
-Pour créer le site manuellement plutôt qu’avec le Blueprint, utilisez ces paramètres dans Render :
-
-- **Root Directory** : laisser vide
-- **Build Command** : `cd ex01 && npm ci && npm run build`
-- **Publish Directory** : `ex01/dist/ex01/browser`
-- **Rewrite Rule** : source `/*`, destination `/index.html`
 
 ## Running unit tests
 

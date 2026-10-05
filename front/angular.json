@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "ex01": {
+    "front": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -38,7 +38,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
+                  "maximumWarning": "6kB",
                   "maximumError": "8kB"
                 }
               ],
@@ -56,10 +56,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ex01:build:production"
+              "buildTarget": "front:build:production"
             },
             "development": {
-              "buildTarget": "ex01:build:development"
+              "buildTarget": "front:build:development"
             }
           },
           "defaultConfiguration": "development"
