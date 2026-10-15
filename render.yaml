@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: vigie
+    runtime: static
+    rootDir: front
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist/front/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

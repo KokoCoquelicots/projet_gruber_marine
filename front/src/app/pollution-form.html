@@ -1,0 +1,142 @@
+<div class="site-shell">
+  <header class="topbar">
+    <a class="brand" href="#accueil" aria-label="Vigie, accueil">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span>VIGIE<span class="brand-period">.</span></span>
+    </a>
+    <div class="topbar-note"><span class="status-dot"></span> Espace de signalement</div>
+  </header>
+
+  <main id="accueil" class="page-layout">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow"><span class="eyebrow-line"></span> OBSERVATION ENVIRONNEMENTALE</p>
+      <h1 id="page-title">Votre regard<br>peut <em>tout changer.</em></h1>
+      <p class="intro-copy">Signalez une pollution observée près de chez vous. Chaque information aide à mieux comprendre et protéger notre environnement.</p>
+
+      <div class="process" aria-label="Étapes du signalement">
+        <div class="process-step process-step-active"><span class="step-number">01</span><span>Déclaration</span></div>
+        <span class="process-rule" aria-hidden="true"></span>
+        <div class="process-step"><span class="step-number">02</span><span>Récapitulatif</span></div>
+      </div>
+
+      <div class="field-note">
+        <span class="note-symbol" aria-hidden="true">i</span>
+        <p>Les champs marqués d’un astérisque sont nécessaires pour traiter votre signalement.</p>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Déclaration de pollution">
+      @if (submittedDeclaration(); as declaration) {
+        <div class="workspace-heading">
+          <p class="eyebrow"><span class="eyebrow-line"></span> ÉTAPE 02</p>
+          <h2>Déclaration enregistrée</h2>
+          <p>Vérifiez les informations transmises.</p>
+        </div>
+        <app-pollution-summary [declaration]="declaration"></app-pollution-summary>
+        <button class="secondary-button" type="button" (click)="startNewDeclaration()">
+          <span aria-hidden="true">+</span> Nouvelle déclaration
+        </button>
+      } @else {
+        <div class="workspace-heading">
+          <p class="eyebrow"><span class="eyebrow-line"></span> ÉTAPE 01</p>
+          <h2>Décrire l’observation</h2>
+          <p>Partagez les détails qui permettront de localiser le problème.</p>
+        </div>
+
+        <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()" novalidate>
+          <div class="field-grid">
+            <label class="field field-full" for="title">
+              <span class="field-label">Titre de la pollution <span class="required-mark">*</span></span>
+              <input id="title" type="text" formControlName="title" placeholder="Ex. Déchets plastiques sur la berge" autocomplete="off">
+              @if (declarationForm.controls.title.touched && declarationForm.controls.title.hasError('required')) {
+                <span class="error-message" role="alert">Le titre est requis.</span>
+              }
+            </label>
+
+            <label class="field field-full" for="type">
+              <span class="field-label">Type de pollution <span class="required-mark">*</span></span>
+              <select id="type" formControlName="type">
+                <option value="" disabled>Sélectionner un type</option>
+                <option value="Plastique">Plastique</option>
+                <option value="Chimique">Chimique</option>
+                <option value="Dépôt sauvage">Dépôt sauvage</option>
+                <option value="Eau">Eau</option>
+                <option value="Air">Air</option>
+                <option value="Autre">Autre</option>
+              </select>
+              @if (declarationForm.controls.type.touched && declarationForm.controls.type.hasError('required')) {
+                <span class="error-message" role="alert">Sélectionnez un type de pollution.</span>
+              }
+            </label>
+
+            <label class="field field-full" for="description">
+              <span class="field-label">Description <span class="required-mark">*</span></span>
+              <textarea id="description" formControlName="description" rows="4" placeholder="Décrivez ce que vous avez observé, son étendue et son évolution éventuelle."></textarea>
+              @if (declarationForm.controls.description.touched && declarationForm.controls.description.hasError('required')) {
+                <span class="error-message" role="alert">La description est requise.</span>
+              }
+            </label>
+
+            <label class="field" for="observedAt">
+              <span class="field-label">Date de l’observation <span class="required-mark">*</span></span>
+              <input id="observedAt" type="date" formControlName="observedAt">
+              @if (declarationForm.controls.observedAt.touched && declarationForm.controls.observedAt.hasError('required')) {
+                <span class="error-message" role="alert">La date est requise.</span>
+              } @else if (declarationForm.controls.observedAt.touched && declarationForm.controls.observedAt.hasError('invalidDate')) {
+                <span class="error-message" role="alert">Saisissez une date valide.</span>
+              }
+            </label>
+
+            <label class="field" for="location">
+              <span class="field-label">Lieu <span class="required-mark">*</span></span>
+              <input id="location" type="text" formControlName="location" placeholder="Ville, rue ou repère">
+              @if (declarationForm.controls.location.touched && declarationForm.controls.location.hasError('required')) {
+                <span class="error-message" role="alert">Le lieu est requis.</span>
+              }
+            </label>
+
+            <label class="field" for="latitude">
+              <span class="field-label">Latitude <span class="required-mark">*</span></span>
+              <input id="latitude" type="number" formControlName="latitude" min="-90" max="90" step="any" placeholder="Ex. 48.8566" inputmode="decimal">
+              @if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('required')) {
+                <span class="error-message" role="alert">La latitude est requise.</span>
+              } @else if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('coordinateRange')) {
+                <span class="error-message" role="alert">La latitude doit être comprise entre -90 et 90.</span>
+              }
+            </label>
+
+            <label class="field" for="longitude">
+              <span class="field-label">Longitude <span class="required-mark">*</span></span>
+              <input id="longitude" type="number" formControlName="longitude" min="-180" max="180" step="any" placeholder="Ex. 2.3522" inputmode="decimal">
+              @if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('required')) {
+                <span class="error-message" role="alert">La longitude est requise.</span>
+              } @else if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('coordinateRange')) {
+                <span class="error-message" role="alert">La longitude doit être comprise entre -180 et 180.</span>
+              }
+            </label>
+
+            <label class="field field-full" for="photoUrl">
+              <span class="field-label">Photo <span class="optional-label">OPTIONNEL</span></span>
+              <input id="photoUrl" type="url" formControlName="photoUrl" placeholder="https://exemple.fr/photo.jpg" autocomplete="url">
+              @if (declarationForm.controls.photoUrl.touched && declarationForm.controls.photoUrl.invalid) {
+                <span class="error-message" role="alert">Saisissez une URL de photo valide.</span>
+              }
+            </label>
+          </div>
+
+          <div class="form-footer">
+            <p><span class="required-mark">*</span> Champs obligatoires</p>
+            <button class="primary-button" type="submit">
+              Déclarer <span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <span>VIGIE <span class="brand-period">.</span></span>
+    <span>Observer, signaler, préserver.</span>
+  </footer>
+</div>
