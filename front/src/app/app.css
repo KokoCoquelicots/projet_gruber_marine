@@ -54,12 +54,21 @@
 	color: #d2784d;
 }
 
-.topbar-note {
-	display: flex;
-	align-items: center;
-	gap: 9px;
-	color: #64736b;
-	font-size: 12px;
+.topbar-action {
+	min-height: 38px;
+	padding: 0 13px;
+	border: 1px solid #cbd8cf;
+	border-radius: 3px;
+	background: transparent;
+	color: #315b4a;
+	cursor: pointer;
+	font: inherit;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.topbar-action:hover {
+	background: #edf3eb;
 }
 
 .status-dot {
@@ -419,7 +428,9 @@ textarea.ng-touched.ng-invalid {
 		min-height: 68px;
 	}
 
-	.topbar-note {
+	.topbar-action {
+		min-height: 35px;
+		padding-inline: 9px;
 		font-size: 10px;
 	}
 

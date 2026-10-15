@@ -1,0 +1,54 @@
+<div class="workspace-heading">
+  <p class="eyebrow"><span class="eyebrow-line"></span> INSCRIPTION</p>
+  <h2>Créer votre compte</h2>
+  <p>Inscrivez-vous pour participer à la protection de votre environnement.</p>
+</div>
+
+<form [formGroup]="signupForm" (ngSubmit)="submitSignup()" novalidate>
+  <div class="signup-fields">
+    <label class="signup-field" for="signup-name">
+      <span>Nom <span class="required-mark">*</span></span>
+      <input id="signup-name" type="text" formControlName="name" autocomplete="name" placeholder="Votre nom">
+      @if (signupForm.controls.name.touched && signupForm.controls.name.hasError('required')) {
+        <span class="error-message" role="alert">Le nom est requis.</span>
+      } @else if (signupForm.controls.name.touched && signupForm.controls.name.hasError('minlength')) {
+        <span class="error-message" role="alert">Le nom doit contenir au moins 2 caractères.</span>
+      }
+    </label>
+
+    <label class="signup-field" for="signup-email">
+      <span>Adresse e-mail <span class="required-mark">*</span></span>
+      <input id="signup-email" type="email" formControlName="email" autocomplete="email" placeholder="nom@exemple.fr">
+      @if (signupForm.controls.email.touched && signupForm.controls.email.hasError('required')) {
+        <span class="error-message" role="alert">L’adresse e-mail est requise.</span>
+      } @else if (signupForm.controls.email.touched && signupForm.controls.email.hasError('email')) {
+        <span class="error-message" role="alert">Saisissez une adresse e-mail valide.</span>
+      }
+    </label>
+
+    <label class="signup-field" for="signup-password">
+      <span>Mot de passe <span class="required-mark">*</span></span>
+      <input id="signup-password" type="password" formControlName="password" autocomplete="new-password" placeholder="8 caractères minimum">
+      @if (signupForm.controls.password.touched && signupForm.controls.password.hasError('required')) {
+        <span class="error-message" role="alert">Le mot de passe est requis.</span>
+      } @else if (signupForm.controls.password.touched && signupForm.controls.password.hasError('minlength')) {
+        <span class="error-message" role="alert">Le mot de passe doit contenir au moins 8 caractères.</span>
+      }
+    </label>
+  </div>
+
+  @if (successMessage()) {
+    <p class="signup-feedback signup-success" role="status">{{ successMessage() }}</p>
+  }
+  @if (errorMessage()) {
+    <p class="signup-feedback signup-error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <div class="signup-footer">
+    <span><span class="required-mark">*</span> Champs obligatoires</span>
+    <button class="primary-button" type="submit" [disabled]="submitting()">
+      {{ submitting() ? 'Création…' : 'Créer mon compte' }}
+      @if (!submitting()) { <span class="button-arrow" aria-hidden="true">→</span> }
+    </button>
+  </div>
+</form>

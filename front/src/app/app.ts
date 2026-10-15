@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { PollutionDeclaration, PollutionType } from './models/pollution-declaration';
 import { PollutionSummary } from './components/pollution-summary/pollution-summary';
+import { SignupComponent } from './components/signup/signup';
 
 const validDate: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const value = control.value as string;
@@ -32,11 +33,12 @@ const coordinateRange = (minimum: number, maximum: number): ValidatorFn => (cont
 
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule, PollutionSummary],
+  imports: [ReactiveFormsModule, PollutionSummary, SignupComponent],
   templateUrl: './pollution-form.html',
   styleUrl: './app.css'
 })
 export class App {
+  readonly showSignup = signal(false);
   readonly submittedDeclaration = signal<PollutionDeclaration | null>(null);
 
   readonly declarationForm = new FormGroup({

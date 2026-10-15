@@ -4,7 +4,9 @@
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <span>VIGIE<span class="brand-period">.</span></span>
     </a>
-    <div class="topbar-note"><span class="status-dot"></span> Espace de signalement</div>
+    <button class="topbar-action" type="button" (click)="showSignup.set(!showSignup())">
+      {{ showSignup() ? 'Retour au signalement' : 'Créer un compte' }}
+    </button>
   </header>
 
   <main id="accueil" class="page-layout">
@@ -26,7 +28,9 @@
     </section>
 
     <section class="workspace" aria-label="Déclaration de pollution">
-      @if (submittedDeclaration(); as declaration) {
+      @if (showSignup()) {
+        <app-signup (backToReport)="showSignup.set(false)"></app-signup>
+      } @else if (submittedDeclaration(); as declaration) {
         <div class="workspace-heading">
           <p class="eyebrow"><span class="eyebrow-line"></span> ÉTAPE 02</p>
           <h2>Déclaration enregistrée</h2>
