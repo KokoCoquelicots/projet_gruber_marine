@@ -7,7 +7,7 @@ services:
     startCommand: npm start
     envVars:
       - key: FRONTEND_ORIGIN
-        value: https://vigie.onrender.com
+        value: https://vigie-c9tg.onrender.com
   - type: web
     name: vigie
     runtime: static
