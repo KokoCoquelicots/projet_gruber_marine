@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://vigie-api.onrender.com/api'
+  apiUrl: 'https://vigie-api-g9o9.onrender.com/api'
 };
