@@ -30,6 +30,10 @@ test('provides seeded records and a not-found response', async () => {
   assert.equal(response.status, 200);
   assert.equal((await response.json()).length, 2);
 
+  const singularRoute = await fetch(baseUrl.replace('/pollutions', '/pollution'));
+  assert.equal(singularRoute.status, 200);
+  assert.equal((await singularRoute.json()).length, 2);
+
   const missing = await fetch(`${baseUrl}/unknown`);
   assert.equal(missing.status, 404);
   assert.deepEqual(await missing.json(), { message: 'Signalement introuvable.' });
