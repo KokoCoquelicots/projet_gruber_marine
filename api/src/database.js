@@ -1,19 +1,23 @@
-const { Pool } = require('pg');
+$env:DATABASE_URL = "COLLE_ICI_L_URL_EXTERNE"
+$env:DATABASE_SSL = "true"
+npm startconst { Sequelize } = require('sequelize');
 
-function createDatabasePool() {
+function createDatabaseConnection() {
   if (!process.env.DATABASE_URL) {
     throw new Error('La variable DATABASE_URL est requise pour démarrer l’API avec PostgreSQL.');
   }
 
-  const ssl = process.env.DATABASE_SSL === 'true'
+  const dialectOptions = process.env.DATABASE_SSL === 'true'
     ? { rejectUnauthorized: false }
     : undefined;
 
-  return new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl,
-    connectionTimeoutMillis: 10_000
+  return new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: dialectOptions ? { ssl: dialectOptions } : undefined,
+    logging: false,
+    retry: { max: 2 },
+    pool: { acquire: 10_000 }
   });
 }
 
-module.exports = { createDatabasePool };
+module.exports = { createDatabaseConnection };

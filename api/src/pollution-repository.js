@@ -1,6 +1,3 @@
-const fs = require('node:fs/promises');
-const path = require('node:path');
-
 const initialPollutions = [
   {
     id: 'pollution-001',
@@ -27,19 +24,6 @@ const initialPollutions = [
     createdAt: '2026-10-12T09:30:00.000Z'
   }
 ];
-
-const selectFields = `
-  id,
-  title,
-  pollution_type AS type,
-  description,
-  to_char(observed_at, 'YYYY-MM-DD') AS "observedAt",
-  location,
-  latitude::double precision AS latitude,
-  longitude::double precision AS longitude,
-  photo_url AS "photoUrl",
-  created_at AS "createdAt"
-`;
 
 function createMemoryRepository() {
   const pollutions = initialPollutions.map((pollution) => ({ ...pollution }));
@@ -74,100 +58,35 @@ function createMemoryRepository() {
   };
 }
 
-function createPostgresRepository(pool) {
+function createSequelizePollutionRepository(Pollution) {
   return {
     async initialize() {
-      const schema = await fs.readFile(path.join(__dirname, 'schema.sql'), 'utf8');
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        await client.query(schema);
-        const { rows } = await client.query('SELECT COUNT(*)::int AS count FROM pollution');
-        if (rows[0].count === 0) {
-          for (const pollution of initialPollutions) {
-            await insertPollution(client, pollution);
-          }
-        }
-        await client.query('COMMIT');
-      } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-      } finally {
-        client.release();
+      if (await Pollution.count() === 0) {
+        await Pollution.bulkCreate(initialPollutions);
       }
     },
     async getAll() {
-      const { rows } = await pool.query(
-        `SELECT ${selectFields} FROM pollution ORDER BY observed_at DESC, created_at DESC`
-      );
-      return rows;
+      return Pollution.findAll({ order: [['observedAt', 'DESC'], ['createdAt', 'DESC']] });
     },
     async getById(id) {
-      const { rows } = await pool.query(
-        `SELECT ${selectFields} FROM pollution WHERE id = $1`,
-        [id]
-      );
-      return rows[0] || null;
+      return Pollution.findByPk(id);
     },
-    async create(pollution) {
-      return insertPollution(pool, pollution);
+    async create(declaration) {
+      return Pollution.create(declaration);
     },
     async update(id, declaration) {
-      const { rows } = await pool.query(
-        `UPDATE pollution
-         SET title = $2,
-             pollution_type = $3,
-             description = $4,
-             observed_at = $5,
-             location = $6,
-             latitude = $7,
-             longitude = $8,
-             photo_url = $9
-         WHERE id = $1
-         RETURNING ${selectFields}`,
-        [
-          id,
-          declaration.title,
-          declaration.type,
-          declaration.description,
-          declaration.observedAt,
-          declaration.location,
-          declaration.latitude,
-          declaration.longitude,
-          declaration.photoUrl
-        ]
-      );
-      return rows[0] || null;
+      const pollution = await Pollution.findByPk(id);
+      if (!pollution) return null;
+      await pollution.update(declaration);
+      return pollution;
     },
     async delete(id) {
-      const { rowCount } = await pool.query('DELETE FROM pollution WHERE id = $1', [id]);
-      return rowCount > 0;
+      const pollution = await Pollution.findByPk(id);
+      if (!pollution) return false;
+      await pollution.destroy();
+      return true;
     }
   };
 }
 
-async function insertPollution(clientOrPool, pollution) {
-  const { rows } = await clientOrPool.query(
-    `INSERT INTO pollution (
-       id, title, pollution_type, description, observed_at, location,
-       latitude, longitude, photo_url, created_at
-     )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-     RETURNING ${selectFields}`,
-    [
-      pollution.id,
-      pollution.title,
-      pollution.type,
-      pollution.description,
-      pollution.observedAt,
-      pollution.location,
-      pollution.latitude,
-      pollution.longitude,
-      pollution.photoUrl,
-      pollution.createdAt
-    ]
-  );
-  return rows[0];
-}
-
-module.exports = { createMemoryRepository, createPostgresRepository };
+module.exports = { createMemoryRepository, createSequelizePollutionRepository };

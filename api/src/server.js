@@ -1,7 +1,9 @@
 const http = require('node:http');
 const { randomUUID } = require('node:crypto');
-const { createDatabasePool } = require('./database');
-const { createMemoryRepository, createPostgresRepository } = require('./pollution-repository');
+const { createDatabaseConnection } = require('./database');
+const { createModels, initializeModels } = require('./models');
+const { createMemoryRepository, createSequelizePollutionRepository } = require('./pollution-repository');
+const { createMemoryUserRepository, createSequelizeUserRepository } = require('./user-repository');
 
 const pollutionTypes = new Set(['Plastique', 'Chimique', 'Dépôt sauvage', 'Eau', 'Air', 'Autre']);
 
@@ -57,6 +59,32 @@ function validateDeclaration(value) {
   return null;
 }
 
+function validateUser(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return 'Le corps de la requête doit contenir un utilisateur.';
+  }
+  if (typeof value.name !== 'string' || !value.name.trim() || value.name.trim().length > 100) {
+    return 'Le nom est requis et ne peut pas dépasser 100 caractères.';
+  }
+  if (typeof value.email !== 'string' || value.email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email.trim())) {
+    return 'Une adresse e-mail valide est requise.';
+  }
+  if (typeof value.password !== 'string' || value.password.length < 8 || value.password.length > 128) {
+    return 'Le mot de passe doit contenir entre 8 et 128 caractères.';
+  }
+  return null;
+}
+
+function validateCredentials(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      typeof value.email !== 'string' || !value.email.trim() ||
+      typeof value.password !== 'string' || !value.password) {
+    return 'Une adresse e-mail et un mot de passe sont requis.';
+  }
+  return null;
+}
+
 function parseBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -81,7 +109,7 @@ function parseBody(request) {
 function sendError(response, error) {
   if (response.destroyed) return;
 
-  if (error.status === 400 || error.status === 413) {
+  if ([400, 409, 413].includes(error.status)) {
     sendJson(response, error.status, { message: error.message });
     return;
   }
@@ -90,7 +118,10 @@ function sendError(response, error) {
   sendJson(response, 500, { message: 'Une erreur interne est survenue.' });
 }
 
-function createServer({ repository = createMemoryRepository() } = {}) {
+function createServer({
+  repository = createMemoryRepository(),
+  userRepository = createMemoryUserRepository()
+} = {}) {
   const allowedOrigin = process.env.FRONTEND_ORIGIN || '*';
 
   return http.createServer(async (request, response) => {
@@ -116,12 +147,80 @@ function createServer({ repository = createMemoryRepository() } = {}) {
       return;
     }
 
-    if (segments[0] !== 'api' || !['pollution', 'pollutions'].includes(segments[1]) || segments.length > 3) {
+    if (segments[0] !== 'api' || !['pollution', 'pollutions', 'users'].includes(segments[1]) || segments.length > 3) {
       sendJson(response, 404, { message: 'Route introuvable.' });
       return;
     }
 
     const id = segments[2];
+
+    if (segments[1] === 'users') {
+      if (request.method === 'POST' && id === 'authenticate') {
+        try {
+          const credentials = await parseBody(request);
+          const validationError = validateCredentials(credentials);
+          if (validationError) {
+            sendJson(response, 400, { message: validationError });
+            return;
+          }
+          const user = await userRepository.authenticate(credentials.email.trim().toLowerCase(), credentials.password);
+          if (!user) {
+            sendJson(response, 401, { message: 'Adresse e-mail ou mot de passe incorrect.' });
+            return;
+          }
+          sendJson(response, 200, user);
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'GET' && !id) {
+        try {
+          sendJson(response, 200, await userRepository.getAll());
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'POST' && !id) {
+        try {
+          const value = await parseBody(request);
+          const validationError = validateUser(value);
+          if (validationError) {
+            sendJson(response, 400, { message: validationError });
+            return;
+          }
+          const user = await userRepository.create({
+            id: randomUUID(),
+            name: value.name.trim(),
+            email: value.email.trim().toLowerCase(),
+            password: value.password
+          });
+          sendJson(response, 201, user);
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'DELETE' && id) {
+        try {
+          if (!(await userRepository.delete(id))) {
+            sendJson(response, 404, { message: 'Utilisateur introuvable.' });
+            return;
+          }
+          sendJson(response, 200, { message: 'Utilisateur supprimé.' });
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      sendJson(response, 405, { message: 'Méthode non autorisée.' });
+      return;
+    }
 
     if (request.method === 'GET' && !id) {
       try {
@@ -206,16 +305,20 @@ function createServer({ repository = createMemoryRepository() } = {}) {
 
 if (require.main === module) {
   async function start() {
-    const pool = createDatabasePool();
-    const repository = createPostgresRepository(pool);
+    const sequelize = createDatabaseConnection();
+    const models = createModels(sequelize);
+    const repository = createSequelizePollutionRepository(models.Pollution);
+    const userRepository = createSequelizeUserRepository(models.User);
     try {
+      await sequelize.authenticate();
+      await initializeModels(sequelize, models);
       await repository.initialize();
       const port = Number(process.env.PORT || 3000);
-      createServer({ repository }).listen(port, '0.0.0.0', () => {
+      createServer({ repository, userRepository }).listen(port, '0.0.0.0', () => {
         console.log(`API Vigie disponible sur le port ${port}`);
       });
     } catch (error) {
-      await pool.end();
+      await sequelize.close();
       throw error;
     }
   }

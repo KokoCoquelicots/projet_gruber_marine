@@ -1,0 +1,53 @@
+<main class="page-layout">
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> ESPACE COMMUNAUTAIRE</p>
+    <h1 id="page-title">Chaque geste<br><em>compte.</em></h1>
+    <p class="intro-copy">Créez un compte pour rejoindre la communauté Vigie et contribuer à la protection du vivant.</p>
+    <a class="back-link" routerLink="/users">← Retour aux utilisateurs</a>
+  </section>
+
+  <section class="workspace" aria-labelledby="form-title">
+    <div class="workspace-heading">
+      <p class="eyebrow"><span class="eyebrow-line"></span> NOUVEAU COMPTE</p>
+      <h2 id="form-title">Créer un utilisateur</h2>
+      <p>Les mots de passe sont hachés et ne sont jamais stockés en clair.</p>
+    </div>
+
+    @if (error()) {
+      <p class="notice notice-error" role="alert">{{ error() }}</p>
+    }
+    <form [formGroup]="registrationForm" (ngSubmit)="submit()" novalidate>
+      <div class="field-grid">
+        <label class="field field-full" for="user-name">
+          <span class="field-label">Nom <span class="required-mark">*</span></span>
+          <input id="user-name" type="text" formControlName="name" maxlength="100" autocomplete="name">
+          @if (registrationForm.controls.name.touched && registrationForm.controls.name.hasError('required')) {
+            <span class="error-message" role="alert">Le nom est requis.</span>
+          }
+        </label>
+        <label class="field field-full" for="user-email">
+          <span class="field-label">Adresse e-mail <span class="required-mark">*</span></span>
+          <input id="user-email" type="email" formControlName="email" maxlength="254" autocomplete="email">
+          @if (registrationForm.controls.email.touched && registrationForm.controls.email.invalid) {
+            <span class="error-message" role="alert">Saisissez une adresse e-mail valide.</span>
+          }
+        </label>
+        <label class="field field-full" for="user-password">
+          <span class="field-label">Mot de passe <span class="required-mark">*</span></span>
+          <input id="user-password" type="password" formControlName="password" minlength="8" maxlength="128" autocomplete="new-password">
+          @if (registrationForm.controls.password.touched && registrationForm.controls.password.hasError('required')) {
+            <span class="error-message" role="alert">Le mot de passe est requis.</span>
+          } @else if (registrationForm.controls.password.touched && registrationForm.controls.password.invalid) {
+            <span class="error-message" role="alert">Le mot de passe doit contenir au moins 8 caractères.</span>
+          }
+        </label>
+      </div>
+      <div class="form-footer">
+        <p><span class="required-mark">*</span> Champs obligatoires</p>
+        <button class="primary-button" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Création…' : 'Créer le compte' }} <span class="button-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>

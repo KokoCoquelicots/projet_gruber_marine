@@ -395,6 +395,56 @@ textarea.ng-touched.ng-invalid {
 	letter-spacing: 0.07em;
 }
 
+.topbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.signed-in {
+	color: #64736b;
+	font-size: 11px;
+}
+
+.user-list {
+	display: grid;
+	gap: 11px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.user-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 17px 18px;
+	border: 1px solid #e5eae2;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.user-card h3 {
+	margin: 0 0 5px;
+	color: #29463b;
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 17px;
+	font-weight: 400;
+}
+
+.user-card p {
+	margin: 0;
+	color: #67776e;
+	font-size: 11px;
+}
+
+.user-card .user-created {
+	margin-top: 6px;
+	color: #929d95;
+	font-size: 10px;
+}
+
 @media (max-width: 1020px) {
 	.page-layout {
 		grid-template-columns: 1fr;
@@ -442,6 +492,10 @@ textarea.ng-touched.ng-invalid {
 
 	.topbar-note {
 		font-size: 10px;
+	}
+
+	.topbar-actions {
+		gap: 12px;
 	}
 
 	.page-layout {
@@ -502,6 +556,14 @@ textarea.ng-touched.ng-invalid {
 	.process-step {
 		gap: 5px;
 		font-size: 10px;
+	}
+
+	.topbar-actions {
+		gap: 8px;
+	}
+
+	.signed-in {
+		display: none;
 	}
 
 	.form-footer {
