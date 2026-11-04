@@ -1,6 +1,4 @@
-$env:DATABASE_URL = "COLLE_ICI_L_URL_EXTERNE"
-$env:DATABASE_SSL = "true"
-npm startconst { Sequelize } = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 function createDatabaseConnection() {
   if (!process.env.DATABASE_URL) {
