@@ -10,3 +10,8 @@ export interface PollutionDeclaration {
   longitude: number;
   photoUrl: string;
 }
+
+export interface Pollution extends PollutionDeclaration {
+  id: string;
+  createdAt: string;
+}

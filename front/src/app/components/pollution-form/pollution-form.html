@@ -1,0 +1,120 @@
+<main class="page-layout">
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> OBSERVATION ENVIRONNEMENTALE</p>
+    <h1 id="page-title">Votre regard<br>peut <em>tout changer.</em></h1>
+    <p class="intro-copy">Signalez une pollution observée près de chez vous. Chaque information aide à mieux comprendre et protéger notre environnement.</p>
+    <a class="back-link" routerLink="/">← Retour aux signalements</a>
+    <div class="field-note">
+      <span class="note-symbol" aria-hidden="true">i</span>
+      <p>Les champs marqués d’un astérisque sont nécessaires pour traiter votre signalement.</p>
+    </div>
+  </section>
+
+  <section class="workspace" aria-label="Déclaration de pollution">
+    <div class="workspace-heading">
+      <p class="eyebrow"><span class="eyebrow-line"></span> {{ isEditing ? 'MODIFICATION' : 'NOUVEAU SIGNALEMENT' }}</p>
+      <h2>{{ isEditing ? 'Modifier le signalement' : 'Décrire l’observation' }}</h2>
+      <p>Partagez les détails qui permettront de localiser le problème.</p>
+    </div>
+
+    @if (loading()) {
+      <p class="empty-state" role="status">Chargement du signalement…</p>
+    } @else if (loadFailed()) {
+      <p class="notice notice-error" role="alert">{{ error() }}</p>
+      <a class="secondary-button" routerLink="/">Retour aux signalements</a>
+    } @else {
+      @if (error()) {
+        <p class="notice notice-error" role="alert">{{ error() }}</p>
+      }
+      <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()" novalidate>
+        <div class="field-grid">
+          <label class="field field-full" for="title">
+            <span class="field-label">Titre de la pollution <span class="required-mark">*</span></span>
+            <input id="title" type="text" formControlName="title" maxlength="120" placeholder="Ex. Déchets plastiques sur la berge" autocomplete="off">
+            @if (declarationForm.controls.title.touched && declarationForm.controls.title.hasError('required')) {
+              <span class="error-message" role="alert">Le titre est requis.</span>
+            } @else if (declarationForm.controls.title.touched && declarationForm.controls.title.hasError('maxlength')) {
+              <span class="error-message" role="alert">Le titre ne peut pas dépasser 120 caractères.</span>
+            }
+          </label>
+
+          <label class="field field-full" for="type">
+            <span class="field-label">Type de pollution <span class="required-mark">*</span></span>
+            <select id="type" formControlName="type">
+              <option value="" disabled>Sélectionner un type</option>
+              @for (type of types; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+            @if (declarationForm.controls.type.touched && declarationForm.controls.type.hasError('required')) {
+              <span class="error-message" role="alert">Sélectionnez un type de pollution.</span>
+            }
+          </label>
+
+          <label class="field field-full" for="description">
+            <span class="field-label">Description <span class="required-mark">*</span></span>
+            <textarea id="description" formControlName="description" rows="4" maxlength="2000" placeholder="Décrivez ce que vous avez observé, son étendue et son évolution éventuelle."></textarea>
+            @if (declarationForm.controls.description.touched && declarationForm.controls.description.hasError('required')) {
+              <span class="error-message" role="alert">La description est requise.</span>
+            } @else if (declarationForm.controls.description.touched && declarationForm.controls.description.hasError('maxlength')) {
+              <span class="error-message" role="alert">La description ne peut pas dépasser 2 000 caractères.</span>
+            }
+          </label>
+
+          <label class="field" for="observedAt">
+            <span class="field-label">Date de l’observation <span class="required-mark">*</span></span>
+            <input id="observedAt" type="date" formControlName="observedAt">
+            @if (declarationForm.controls.observedAt.touched && declarationForm.controls.observedAt.hasError('required')) {
+              <span class="error-message" role="alert">La date est requise.</span>
+            } @else if (declarationForm.controls.observedAt.touched && declarationForm.controls.observedAt.hasError('invalidDate')) {
+              <span class="error-message" role="alert">Saisissez une date valide.</span>
+            }
+          </label>
+
+          <label class="field" for="location">
+            <span class="field-label">Lieu <span class="required-mark">*</span></span>
+            <input id="location" type="text" formControlName="location" maxlength="200" placeholder="Ville, rue ou repère">
+            @if (declarationForm.controls.location.touched && declarationForm.controls.location.hasError('required')) {
+              <span class="error-message" role="alert">Le lieu est requis.</span>
+            }
+          </label>
+
+          <label class="field" for="latitude">
+            <span class="field-label">Latitude <span class="required-mark">*</span></span>
+            <input id="latitude" type="number" formControlName="latitude" min="-90" max="90" step="any" placeholder="Ex. 48.8566" inputmode="decimal">
+            @if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('required')) {
+              <span class="error-message" role="alert">La latitude est requise.</span>
+            } @else if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('coordinateRange')) {
+              <span class="error-message" role="alert">La latitude doit être comprise entre -90 et 90.</span>
+            }
+          </label>
+
+          <label class="field" for="longitude">
+            <span class="field-label">Longitude <span class="required-mark">*</span></span>
+            <input id="longitude" type="number" formControlName="longitude" min="-180" max="180" step="any" placeholder="Ex. 2.3522" inputmode="decimal">
+            @if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('required')) {
+              <span class="error-message" role="alert">La longitude est requise.</span>
+            } @else if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('coordinateRange')) {
+              <span class="error-message" role="alert">La longitude doit être comprise entre -180 et 180.</span>
+            }
+          </label>
+
+          <label class="field field-full" for="photoUrl">
+            <span class="field-label">Photo <span class="optional-label">OPTIONNEL</span></span>
+            <input id="photoUrl" type="url" formControlName="photoUrl" placeholder="https://exemple.fr/photo.jpg" autocomplete="url">
+            @if (declarationForm.controls.photoUrl.touched && declarationForm.controls.photoUrl.invalid) {
+              <span class="error-message" role="alert">Saisissez une URL de photo valide (http ou https).</span>
+            }
+          </label>
+        </div>
+
+        <div class="form-footer">
+          <p><span class="required-mark">*</span> Champs obligatoires</p>
+          <button class="primary-button" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : (isEditing ? 'Enregistrer' : 'Déclarer') }} <span class="button-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+</main>

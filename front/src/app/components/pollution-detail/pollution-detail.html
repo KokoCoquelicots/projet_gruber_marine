@@ -1,0 +1,33 @@
+<main class="page-layout">
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> VIGIE COMMUNAUTAIRE</p>
+    <h1 id="page-title">Un signalement,<br><em>une action.</em></h1>
+    <p class="intro-copy">Retrouvez toutes les informations partagées sur cette observation environnementale.</p>
+    <a class="back-link" routerLink="/">← Retour aux signalements</a>
+  </section>
+  <section class="workspace">
+    @if (loading()) {
+      <p class="empty-state" role="status">Chargement du signalement…</p>
+    } @else if (error() && !pollution()) {
+      <p class="notice notice-error" role="alert">{{ error() }}</p>
+      <a class="secondary-button" routerLink="/">Retour à la liste</a>
+    } @else if (pollution(); as declaration) {
+      <div class="workspace-heading detail-heading">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-line"></span> DÉTAIL DU SIGNALEMENT</p>
+          <h2>{{ declaration.title }}</h2>
+          <p>Signalé le {{ declaration.createdAt | date:'d MMMM y':'':'fr' }}</p>
+        </div>
+        <a class="secondary-button edit-button" [routerLink]="['/pollutions', declaration.id, 'edit']">Modifier</a>
+      </div>
+      @if (error()) {
+        <p class="notice notice-error" role="alert">{{ error() }}</p>
+      }
+      <app-pollution-summary [declaration]="declaration"></app-pollution-summary>
+      <div class="detail-actions">
+        <a class="text-button" routerLink="/">← Tous les signalements</a>
+        <button class="text-button delete-button" type="button" (click)="deletePollution()">Supprimer ce signalement</button>
+      </div>
+    }
+  </section>
+</main>

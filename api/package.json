@@ -1,0 +1,13 @@
+{
+  "name": "vigie-pollution-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API REST simulée en mémoire pour gérer les signalements de pollution.",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
