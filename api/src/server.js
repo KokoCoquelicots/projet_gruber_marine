@@ -1,34 +1,11 @@
 const http = require('node:http');
 const { randomUUID } = require('node:crypto');
+const { createDatabaseConnection } = require('./database');
+const { createModels, initializeModels } = require('./models');
+const { createMemoryRepository, createSequelizePollutionRepository } = require('./pollution-repository');
+const { createMemoryUserRepository, createSequelizeUserRepository } = require('./user-repository');
 
 const pollutionTypes = new Set(['Plastique', 'Chimique', 'Dépôt sauvage', 'Eau', 'Air', 'Autre']);
-
-const initialPollutions = [
-  {
-    id: 'pollution-001',
-    title: 'Déchets plastiques sur la berge',
-    type: 'Plastique',
-    description: 'Plusieurs bouteilles et emballages sont accumulés au bord de la Loire.',
-    observedAt: '2026-10-05',
-    location: 'Quai de la Loire, Nantes',
-    latitude: 47.2184,
-    longitude: -1.5536,
-    photoUrl: '',
-    createdAt: '2026-10-05T10:00:00.000Z'
-  },
-  {
-    id: 'pollution-002',
-    title: 'Dépôt sauvage près du chemin',
-    type: 'Dépôt sauvage',
-    description: 'Des sacs et encombrants ont été déposés en bordure du chemin.',
-    observedAt: '2026-10-12',
-    location: 'Parc de Procé, Nantes',
-    latitude: 47.2288,
-    longitude: -1.5824,
-    photoUrl: '',
-    createdAt: '2026-10-12T09:30:00.000Z'
-  }
-];
 
 function sendJson(response, status, payload) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -82,6 +59,32 @@ function validateDeclaration(value) {
   return null;
 }
 
+function validateUser(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return 'Le corps de la requête doit contenir un utilisateur.';
+  }
+  if (typeof value.name !== 'string' || !value.name.trim() || value.name.trim().length > 100) {
+    return 'Le nom est requis et ne peut pas dépasser 100 caractères.';
+  }
+  if (typeof value.email !== 'string' || value.email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email.trim())) {
+    return 'Une adresse e-mail valide est requise.';
+  }
+  if (typeof value.password !== 'string' || value.password.length < 8 || value.password.length > 128) {
+    return 'Le mot de passe doit contenir entre 8 et 128 caractères.';
+  }
+  return null;
+}
+
+function validateCredentials(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      typeof value.email !== 'string' || !value.email.trim() ||
+      typeof value.password !== 'string' || !value.password) {
+    return 'Une adresse e-mail et un mot de passe sont requis.';
+  }
+  return null;
+}
+
 function parseBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -103,8 +106,22 @@ function parseBody(request) {
   });
 }
 
-function createServer() {
-  const pollutions = initialPollutions.map((pollution) => ({ ...pollution }));
+function sendError(response, error) {
+  if (response.destroyed) return;
+
+  if ([400, 409, 413].includes(error.status)) {
+    sendJson(response, error.status, { message: error.message });
+    return;
+  }
+
+  console.error('Erreur lors du traitement de la requête API :', error);
+  sendJson(response, 500, { message: 'Une erreur interne est survenue.' });
+}
+
+function createServer({
+  repository = createMemoryRepository(),
+  userRepository = createMemoryUserRepository()
+} = {}) {
   const allowedOrigin = process.env.FRONTEND_ORIGIN || '*';
 
   return http.createServer(async (request, response) => {
@@ -130,24 +147,101 @@ function createServer() {
       return;
     }
 
-    if (segments[0] !== 'api' || segments[1] !== 'pollutions' || segments.length > 3) {
+    if (segments[0] !== 'api' || !['pollution', 'pollutions', 'users'].includes(segments[1]) || segments.length > 3) {
       sendJson(response, 404, { message: 'Route introuvable.' });
       return;
     }
 
     const id = segments[2];
+
+    if (segments[1] === 'users') {
+      if (request.method === 'POST' && id === 'authenticate') {
+        try {
+          const credentials = await parseBody(request);
+          const validationError = validateCredentials(credentials);
+          if (validationError) {
+            sendJson(response, 400, { message: validationError });
+            return;
+          }
+          const user = await userRepository.authenticate(credentials.email.trim().toLowerCase(), credentials.password);
+          if (!user) {
+            sendJson(response, 401, { message: 'Adresse e-mail ou mot de passe incorrect.' });
+            return;
+          }
+          sendJson(response, 200, user);
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'GET' && !id) {
+        try {
+          sendJson(response, 200, await userRepository.getAll());
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'POST' && !id) {
+        try {
+          const value = await parseBody(request);
+          const validationError = validateUser(value);
+          if (validationError) {
+            sendJson(response, 400, { message: validationError });
+            return;
+          }
+          const user = await userRepository.create({
+            id: randomUUID(),
+            name: value.name.trim(),
+            email: value.email.trim().toLowerCase(),
+            password: value.password
+          });
+          sendJson(response, 201, user);
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      if (request.method === 'DELETE' && id) {
+        try {
+          if (!(await userRepository.delete(id))) {
+            sendJson(response, 404, { message: 'Utilisateur introuvable.' });
+            return;
+          }
+          sendJson(response, 200, { message: 'Utilisateur supprimé.' });
+        } catch (error) {
+          sendError(response, error);
+        }
+        return;
+      }
+
+      sendJson(response, 405, { message: 'Méthode non autorisée.' });
+      return;
+    }
+
     if (request.method === 'GET' && !id) {
-      sendJson(response, 200, [...pollutions].sort((a, b) => b.observedAt.localeCompare(a.observedAt)));
+      try {
+        sendJson(response, 200, await repository.getAll());
+      } catch (error) {
+        sendError(response, error);
+      }
       return;
     }
 
     if (request.method === 'GET' && id) {
-      const pollution = pollutions.find((item) => item.id === id);
-      if (!pollution) {
-        sendJson(response, 404, { message: 'Signalement introuvable.' });
-        return;
+      try {
+        const pollution = await repository.getById(id);
+        if (!pollution) {
+          sendJson(response, 404, { message: 'Signalement introuvable.' });
+          return;
+        }
+        sendJson(response, 200, pollution);
+      } catch (error) {
+        sendError(response, error);
       }
-      sendJson(response, 200, pollution);
       return;
     }
 
@@ -159,21 +253,19 @@ function createServer() {
           sendJson(response, 400, { message: validationError });
           return;
         }
-        const pollution = { ...declaration, id: randomUUID(), createdAt: new Date().toISOString() };
-        pollutions.push(pollution);
-        sendJson(response, 201, pollution);
+        const pollution = {
+          ...declaration,
+          id: randomUUID(),
+          createdAt: new Date().toISOString()
+        };
+        sendJson(response, 201, await repository.create(pollution));
       } catch (error) {
-        if (!response.destroyed) sendJson(response, error.status || 400, { message: error.message });
+        sendError(response, error);
       }
       return;
     }
 
     if (request.method === 'PUT' && id) {
-      const index = pollutions.findIndex((item) => item.id === id);
-      if (index === -1) {
-        sendJson(response, 404, { message: 'Signalement introuvable.' });
-        return;
-      }
       try {
         const declaration = await parseBody(request);
         const validationError = validateDeclaration(declaration);
@@ -181,22 +273,29 @@ function createServer() {
           sendJson(response, 400, { message: validationError });
           return;
         }
-        pollutions[index] = { ...declaration, id, createdAt: pollutions[index].createdAt };
-        sendJson(response, 200, pollutions[index]);
+        const pollution = await repository.update(id, declaration);
+        if (!pollution) {
+          sendJson(response, 404, { message: 'Signalement introuvable.' });
+          return;
+        }
+        sendJson(response, 200, pollution);
       } catch (error) {
-        if (!response.destroyed) sendJson(response, error.status || 400, { message: error.message });
+        sendError(response, error);
       }
       return;
     }
 
     if (request.method === 'DELETE' && id) {
-      const index = pollutions.findIndex((item) => item.id === id);
-      if (index === -1) {
-        sendJson(response, 404, { message: 'Signalement introuvable.' });
-        return;
+      try {
+        const deleted = await repository.delete(id);
+        if (!deleted) {
+          sendJson(response, 404, { message: 'Signalement introuvable.' });
+          return;
+        }
+        sendJson(response, 200, { message: 'Signalement supprimé.' });
+      } catch (error) {
+        sendError(response, error);
       }
-      pollutions.splice(index, 1);
-      sendJson(response, 200, { message: 'Signalement supprimé.' });
       return;
     }
 
@@ -205,8 +304,29 @@ function createServer() {
 }
 
 if (require.main === module) {
-  const port = Number(process.env.PORT || 3000);
-  createServer().listen(port, () => console.log(`API Vigie disponible sur le port ${port}`));
+  async function start() {
+    const sequelize = createDatabaseConnection();
+    const models = createModels(sequelize);
+    const repository = createSequelizePollutionRepository(models.Pollution);
+    const userRepository = createSequelizeUserRepository(models.User);
+    try {
+      await sequelize.authenticate();
+      await initializeModels(sequelize, models);
+      await repository.initialize();
+      const port = Number(process.env.PORT || 3000);
+      createServer({ repository, userRepository }).listen(port, '0.0.0.0', () => {
+        console.log(`API Vigie disponible sur le port ${port}`);
+      });
+    } catch (error) {
+      await sequelize.close();
+      throw error;
+    }
+  }
+
+  start().catch((error) => {
+    console.error('Impossible de démarrer l’API Vigie :', error);
+    process.exitCode = 1;
+  });
 }
 
 module.exports = { createServer };

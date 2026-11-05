@@ -1,0 +1,44 @@
+<main class="page-layout">
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> ESPACE COMMUNAUTAIRE</p>
+    <h1 id="page-title">Ravie de<br><em>vous revoir.</em></h1>
+    <p class="intro-copy">Connectez-vous avec les identifiants créés pour votre compte Vigie.</p>
+    <a class="back-link" routerLink="/">← Retour aux signalements</a>
+  </section>
+
+  <section class="workspace" aria-labelledby="login-title">
+    <div class="workspace-heading">
+      <p class="eyebrow"><span class="eyebrow-line"></span> AUTHENTIFICATION FICTIVE</p>
+      <h2 id="login-title">Connexion</h2>
+      <p>Cette connexion est pédagogique et ne protège pas les opérations de l’application.</p>
+    </div>
+
+    @if (error()) {
+      <p class="notice notice-error" role="alert">{{ error() }}</p>
+    }
+    <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+      <div class="field-grid">
+        <label class="field field-full" for="login-email">
+          <span class="field-label">Adresse e-mail</span>
+          <input id="login-email" type="email" formControlName="email" autocomplete="email">
+          @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+            <span class="error-message" role="alert">Saisissez une adresse e-mail valide.</span>
+          }
+        </label>
+        <label class="field field-full" for="login-password">
+          <span class="field-label">Mot de passe</span>
+          <input id="login-password" type="password" formControlName="password" autocomplete="current-password">
+          @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('required')) {
+            <span class="error-message" role="alert">Le mot de passe est requis.</span>
+          }
+        </label>
+      </div>
+      <div class="form-footer">
+        <a class="text-button" routerLink="/users/new">Créer un compte</a>
+        <button class="primary-button" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Connexion…' : 'Se connecter' }} <span class="button-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
