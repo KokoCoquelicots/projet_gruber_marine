@@ -1,10 +1,25 @@
 <main class="page-layout">
-  <section class="intro" aria-labelledby="page-title">
-    <p class="eyebrow"><span class="eyebrow-line"></span> VIGIE COMMUNAUTAIRE</p>
-    <h1 id="page-title">Un signalement,<br><em>une action.</em></h1>
-    <p class="intro-copy">Retrouvez toutes les informations partagées sur cette observation environnementale.</p>
-    <a class="back-link" routerLink="/">← Retour aux signalements</a>
+  <section class="page-hero" aria-labelledby="page-title">
+    <div class="page-hero-main">
+      <p class="eyebrow"><span class="eyebrow-line"></span> VIGIE COMMUNAUTAIRE</p>
+      <h1 id="page-title">Un signalement, <em>une action.</em></h1>
+    </div>
+    <div class="page-hero-side">
+      <p class="intro-copy">Retrouvez toutes les informations partagées sur cette observation environnementale et sa position sur le globe.</p>
+      <a class="back-link" routerLink="/">← Retour aux signalements</a>
+    </div>
   </section>
+
+  <aside class="globe-column" aria-label="Position sur le globe">
+    @if (pollution(); as declaration) {
+      <app-pollution-globe
+        [pollutions]="globePollutions()"
+        [focusedId]="declaration.id"
+        [showDetailLink]="false"
+      />
+    }
+  </aside>
+
   <section class="workspace">
     @if (loading()) {
       <p class="empty-state" role="status">Chargement du signalement…</p>

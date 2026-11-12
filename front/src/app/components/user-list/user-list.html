@@ -1,0 +1,44 @@
+<main class="page-layout">
+  <section class="intro" aria-labelledby="page-title">
+    <p class="eyebrow"><span class="eyebrow-line"></span> ESPACE COMMUNAUTAIRE</p>
+    <h1 id="page-title">Les voix<br><em>de Vigie.</em></h1>
+    <p class="intro-copy">Consultez les comptes créés pour participer aux signalements environnementaux.</p>
+    <a class="back-link" routerLink="/">← Retour aux signalements</a>
+  </section>
+
+  <section class="workspace" aria-labelledby="users-title">
+    <div class="workspace-heading list-heading">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> GESTION DES UTILISATEURS</p>
+        <h2 id="users-title">Utilisateurs</h2>
+        <p>Les mots de passe ne sont jamais affichés.</p>
+      </div>
+      <a class="primary-button add-button" routerLink="/users/new">+ Créer un compte</a>
+    </div>
+
+    @if (error()) {
+      <p class="notice notice-error" role="alert">{{ error() }}</p>
+    }
+    @if (loading()) {
+      <p class="empty-state" role="status">Chargement des utilisateurs…</p>
+    } @else if (users().length === 0) {
+      <div class="empty-state">
+        <p>Aucun utilisateur pour le moment.</p>
+        <a class="text-button" routerLink="/users/new">Créer le premier compte</a>
+      </div>
+    } @else {
+      <ul class="user-list">
+        @for (user of users(); track user.id) {
+          <li class="user-card">
+            <div>
+              <h3>{{ user.name }}</h3>
+              <p>{{ user.email }}</p>
+              <p class="user-created">Compte créé le {{ user.createdAt | date:'d MMMM y':'':'fr' }}</p>
+            </div>
+            <button class="text-button delete-button" type="button" (click)="deleteUser(user)">Supprimer</button>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</main>

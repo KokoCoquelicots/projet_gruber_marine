@@ -2,12 +2,16 @@
   "name": "vigie-pollution-api",
   "version": "1.0.0",
   "private": true,
-  "description": "API REST simulée en mémoire pour gérer les signalements de pollution.",
+  "description": "API REST PostgreSQL avec Sequelize pour gérer les signalements de pollution et les utilisateurs.",
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "pg": "^8.23.1",
+    "sequelize": "^6.37.8"
   }
 }

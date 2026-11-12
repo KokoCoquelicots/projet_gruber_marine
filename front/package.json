@@ -18,12 +18,18 @@
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "three": "^0.187.0",
+    "topojson-client": "^3.1.0",
+    "tslib": "^2.3.0",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@angular/build": "^21.2.24",
     "@angular/cli": "^21.2.24",
     "@angular/compiler-cli": "^21.2.0",
+    "@types/three": "^0.187.0",
+    "@types/topojson-client": "^3.1.5",
+    "@types/topojson-specification": "^1.0.5",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
