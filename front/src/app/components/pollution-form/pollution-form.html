@@ -1,14 +1,24 @@
 <main class="page-layout">
-  <section class="intro" aria-labelledby="page-title">
-    <p class="eyebrow"><span class="eyebrow-line"></span> OBSERVATION ENVIRONNEMENTALE</p>
-    <h1 id="page-title">Votre regard<br>peut <em>tout changer.</em></h1>
-    <p class="intro-copy">Signalez une pollution observée près de chez vous. Chaque information aide à mieux comprendre et protéger notre environnement.</p>
-    <a class="back-link" routerLink="/">← Retour aux signalements</a>
-    <div class="field-note">
-      <span class="note-symbol" aria-hidden="true">i</span>
-      <p>Les champs marqués d’un astérisque sont nécessaires pour traiter votre signalement.</p>
+  <section class="page-hero" aria-labelledby="page-title">
+    <div class="page-hero-main">
+      <p class="eyebrow"><span class="eyebrow-line"></span> OBSERVATION ENVIRONNEMENTALE</p>
+      <h1 id="page-title">Votre regard peut <em>tout changer.</em></h1>
+    </div>
+    <div class="page-hero-side">
+      <p class="intro-copy">Saisissez une ville pour insérer automatiquement ses coordonnées, ou cliquez directement sur le globe terrestre 3D.</p>
+      <a class="back-link" routerLink="/">← Retour aux signalements</a>
     </div>
   </section>
+
+  <aside class="globe-column" aria-label="Globe terrestre de localisation">
+    <app-pollution-globe
+      [pollutions]="draftPollutions()"
+      [pickable]="true"
+      [showDetailCard]="false"
+      [showDetailLink]="false"
+      (coordinatesPicked)="applyCoordinates($event)"
+    />
+  </aside>
 
   <section class="workspace" aria-label="Déclaration de pollution">
     <div class="workspace-heading">
@@ -72,16 +82,40 @@
           </label>
 
           <label class="field" for="location">
-            <span class="field-label">Lieu <span class="required-mark">*</span></span>
-            <input id="location" type="text" formControlName="location" maxlength="200" placeholder="Ville, rue ou repère">
+            <span class="field-label">Lieu ou ville <span class="required-mark">*</span></span>
+            <input id="location" type="text" formControlName="location" maxlength="200" placeholder="Ville ou adresse (ex. Nantes, Paris, Lyon)">
             @if (declarationForm.controls.location.touched && declarationForm.controls.location.hasError('required')) {
               <span class="error-message" role="alert">Le lieu est requis.</span>
             }
           </label>
 
+          <div class="field field-full geo-toolbar">
+            <div class="geo-toolbar-buttons">
+              <button
+                class="topbar-ghost-btn"
+                type="button"
+                [disabled]="locating()"
+                (click)="locateFromPlaceName()"
+              >
+                {{ locating() ? 'Recherche en cours…' : 'Localiser ce lieu sur le globe' }}
+              </button>
+              <button
+                class="topbar-ghost-btn"
+                type="button"
+                [disabled]="locating()"
+                (click)="useCurrentGeolocation()"
+              >
+                Utiliser ma position GPS
+              </button>
+            </div>
+            @if (geoNotice()) {
+              <span class="geo-notice" role="status">{{ geoNotice() }}</span>
+            }
+          </div>
+
           <label class="field" for="latitude">
             <span class="field-label">Latitude <span class="required-mark">*</span></span>
-            <input id="latitude" type="number" formControlName="latitude" min="-90" max="90" step="any" placeholder="Ex. 48.8566" inputmode="decimal">
+            <input id="latitude" type="number" formControlName="latitude" min="-90" max="90" step="any" placeholder="Ex. 47.2184" inputmode="decimal">
             @if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('required')) {
               <span class="error-message" role="alert">La latitude est requise.</span>
             } @else if (declarationForm.controls.latitude.touched && declarationForm.controls.latitude.hasError('coordinateRange')) {
@@ -91,7 +125,7 @@
 
           <label class="field" for="longitude">
             <span class="field-label">Longitude <span class="required-mark">*</span></span>
-            <input id="longitude" type="number" formControlName="longitude" min="-180" max="180" step="any" placeholder="Ex. 2.3522" inputmode="decimal">
+            <input id="longitude" type="number" formControlName="longitude" min="-180" max="180" step="any" placeholder="Ex. -1.5536" inputmode="decimal">
             @if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('required')) {
               <span class="error-message" role="alert">La longitude est requise.</span>
             } @else if (declarationForm.controls.longitude.touched && declarationForm.controls.longitude.hasError('coordinateRange')) {

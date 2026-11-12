@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of, startWith, Subject, switchMap, tap } from 'rxjs';
 import { Pollution, PollutionType } from '../../models/pollution-declaration';
 import { PollutionService } from '../../services/pollution.service';
+import { PollutionGlobe } from '../pollution-viz/pollution-globe';
 
 interface PollutionFilters {
   query: string;
@@ -17,7 +18,7 @@ interface PollutionFilters {
 
 @Component({
   selector: 'app-pollution-list',
-  imports: [DatePipe, ReactiveFormsModule, RouterLink],
+  imports: [DatePipe, PollutionGlobe, ReactiveFormsModule, RouterLink],
   templateUrl: './pollution-list.html'
 })
 export class PollutionList {
@@ -26,6 +27,7 @@ export class PollutionList {
   readonly types: PollutionType[] = ['Plastique', 'Chimique', 'Dépôt sauvage', 'Eau', 'Air', 'Autre'];
   readonly loading = signal(true);
   readonly error = signal('');
+  readonly hoveredPollutionId = signal<string | null>(null);
   readonly pollutions = toSignal(
     this.refresh.pipe(
       startWith(undefined),
@@ -57,6 +59,14 @@ export class PollutionList {
       (!filters.dateTo || pollution.observedAt <= filters.dateTo)
     );
   });
+  readonly activePollutionId = computed(() => {
+    const focused = this.hoveredPollutionId();
+    const list = this.filteredPollutions();
+    if (focused && list.some((item) => item.id === focused)) {
+      return focused;
+    }
+    return list[0]?.id ?? null;
+  });
   readonly filterForm = new FormGroup({
     query: new FormControl('', { nonNullable: true }),
     type: new FormControl('', { nonNullable: true }),
@@ -73,6 +83,10 @@ export class PollutionList {
         dateTo: value.dateTo ?? ''
       });
     });
+  }
+
+  focusPollution(id: string | null): void {
+    this.hoveredPollutionId.set(id);
   }
 
   deletePollution(pollution: Pollution): void {
