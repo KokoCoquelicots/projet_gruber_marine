@@ -1,36 +1,68 @@
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-	min-width: 320px;
-	min-height: 100%;
-	background: #f5f6f0;
+  min-width: 320px;
+  min-height: 100%;
+  background: #eef4ee;
+  scroll-behavior: smooth;
 }
 
 body {
-	min-width: 320px;
-	min-height: 100vh;
-	margin: 0;
-	color: #263d34;
-	font-family: "Aptos", "Segoe UI", sans-serif;
-	-webkit-font-smoothing: antialiased;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: #263d34;
+  font-family: "Aptos", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(180deg, #f4f8f1 0%, #edf5ec 100%);
 }
 
 button,
 input,
 select,
 textarea {
-	font: inherit;
+  font: inherit;
 }
 
 button:focus-visible,
 a:focus-visible {
-	outline: 3px solid #d2784d;
-	outline-offset: 3px;
+  outline: 3px solid #d2784d;
+  outline-offset: 3px;
 }
 
 ::selection {
-	background: #dce9bf;
-	color: #173b34;
+  background: rgba(118, 170, 107, 0.3);
+  color: #173b34;
+}
+
+.site-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(179, 223, 153, 0.65), transparent 22%),
+    radial-gradient(circle at 82% 20%, rgba(205, 227, 189, 0.55), transparent 24%),
+    linear-gradient(180deg, #f7faf4 0%, #edf5ef 100%);
+}
+
+.nature-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.sun-halo {
+  position: absolute;
+  width: 580px;
+  height: 580px;
+  right: -120px;
+  top: -180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 214, 150, 0.72), rgba(244, 234, 192, 0.2) 38%, transparent 68%);
+  filter: blur(8px);
 }
