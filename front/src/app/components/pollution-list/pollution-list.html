@@ -20,9 +20,20 @@
       <div>
         <p class="eyebrow"><span class="eyebrow-line"></span> VIGIE COMMUNAUTAIRE</p>
         <h2 id="list-title">Signalements</h2>
-        <p>Recherchez et consultez les pollutions observées.</p>
+        <p>Recherchez et consultez les pollutions observées ainsi que leur niveau de dangerosité.</p>
       </div>
       <a class="primary-button add-button" routerLink="/pollutions/new">+ Signaler une pollution</a>
+    </div>
+
+    <div class="danger-scale-bar" aria-label="Échelle des niveaux de pollution">
+      <span class="danger-scale-label">Indice de dangerosité :</span>
+      <div class="danger-scale-items">
+        @for (step of dangerScale; track step.range) {
+          <span class="danger-badge" [appHighlightPollution]="step.sampleIndex">
+            {{ step.range }} · {{ step.sampleIndex | pollutionLevel }}
+          </span>
+        }
+      </div>
     </div>
 
     <form class="filter-panel" [formGroup]="filterForm" aria-label="Filtres des signalements">
@@ -66,6 +77,7 @@
       <p class="result-count" aria-live="polite">{{ filteredPollutions().length }} signalement(s)</p>
       <ul class="pollution-list">
         @for (pollution of filteredPollutions(); track pollution.id) {
+          @let index = dangerIndex(pollution);
           <li
             class="pollution-card"
             [class.pollution-card-active]="activePollutionId() === pollution.id"
@@ -76,6 +88,9 @@
               <div class="pollution-title-line">
                 <a class="pollution-title" [routerLink]="['/pollutions', pollution.id]">{{ pollution.title }}</a>
                 <span class="type-tag">{{ pollution.type }}</span>
+                <span class="danger-badge" [appHighlightPollution]="index">
+                  Indice {{ index }} · {{ index | pollutionLevel }}
+                </span>
               </div>
               <p class="pollution-description">{{ pollution.description }}</p>
               <p class="pollution-meta">

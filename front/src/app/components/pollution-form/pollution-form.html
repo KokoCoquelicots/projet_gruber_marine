@@ -61,6 +61,36 @@
             }
           </label>
 
+          <div class="field field-full danger-control-box">
+            <div class="danger-control-header">
+              <label class="field-label" for="dangerIndexRange">Indice de dangerosité ({{ dangerIndex() }})</label>
+              <span class="danger-badge" [appHighlightPollution]="dangerIndex()">
+                Statut : {{ dangerIndex() | pollutionLevel }}
+              </span>
+            </div>
+            <input
+              id="dangerIndexRange"
+              class="danger-range"
+              type="range"
+              min="0"
+              max="150"
+              [value]="dangerIndex()"
+              (input)="setDangerIndex($any($event.target).value)"
+            >
+            <div class="danger-presets">
+              @for (preset of dangerPresets; track preset.label) {
+                <button
+                  class="danger-preset-btn"
+                  type="button"
+                  [appHighlightPollution]="preset.value"
+                  (click)="setDangerIndex(preset.value)"
+                >
+                  {{ preset.label }} · {{ preset.value | pollutionLevel }}
+                </button>
+              }
+            </div>
+          </div>
+
           <label class="field field-full" for="description">
             <span class="field-label">Description <span class="required-mark">*</span></span>
             <textarea id="description" formControlName="description" rows="4" maxlength="2000" placeholder="Décrivez ce que vous avez observé, son étendue et son évolution éventuelle."></textarea>

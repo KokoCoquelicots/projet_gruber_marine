@@ -4,7 +4,12 @@
       <p class="summary-kicker">VOTRE SIGNALEMENT</p>
       <h3>{{ declaration.title }}</h3>
     </div>
-    <span class="type-tag">{{ declaration.type }}</span>
+    <div class="summary-tags">
+      <span class="type-tag">{{ declaration.type }}</span>
+      <span class="danger-tag" [appHighlightPollution]="dangerIndex">
+        Indice {{ dangerIndex }} · {{ dangerIndex | pollutionLevel }}
+      </span>
+    </div>
   </div>
 
   <p class="description">{{ declaration.description }}</p>
@@ -25,6 +30,14 @@
     <div class="detail">
       <dt>Longitude</dt>
       <dd>{{ declaration.longitude }}</dd>
+    </div>
+    <div class="detail detail-full">
+      <dt>Niveau de dangerosité</dt>
+      <dd class="danger-detail-row">
+        <span class="danger-pill" [appHighlightPollution]="dangerIndex | pollutionLevel">
+          {{ dangerIndex | pollutionLevel }} (indice {{ dangerIndex }})
+        </span>
+      </dd>
     </div>
     <div class="detail detail-full">
       <dt>Photo</dt>

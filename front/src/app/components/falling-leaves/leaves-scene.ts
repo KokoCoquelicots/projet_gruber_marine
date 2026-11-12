@@ -14,8 +14,8 @@ import {
 import { leafFragmentShader, leafVertexShader } from './leaf-shaders';
 import { ATLAS_COLUMNS, ATLAS_ROWS, createLeafAtlas } from './leaf-texture';
 
-const CAMERA_Z = 10;
-const FIELD_OF_VIEW = 45;
+const CAMERA_Z = 5.2;
+const FIELD_OF_VIEW = 36;
 const MAX_PIXEL_RATIO = 1.5;
 /**
  * Couleur du fond du site (#edf5ef), vers laquelle se fondent les feuilles lointaines.
@@ -126,13 +126,13 @@ function createLeafGeometry(count: number): PlaneGeometry {
 
   // Profondeurs triées du plus loin au plus proche : avec la transparence,
   // les instances sont dessinées dans l'ordre, donc les feuilles proches passent bien devant.
-  const depths = Array.from({ length: count }, () => between(-7, 3)).sort((a, b) => a - b);
+  const depths = Array.from({ length: count }, () => between(-3.5, 1.5)).sort((a, b) => a - b);
 
   depths.forEach((depth, i) => {
-    const nearness = (depth + 7) / 10;
-    motion.set([between(-1.15, 0.95), depth, Math.random(), between(14, 22) * (1.25 - nearness * 0.35)], i * 4);
-    swing.set([between(0.35, 0.9), between(0.9, 1.6), between(0, Math.PI * 2), Math.random() < 0.35 ? between(1.5, 3) : between(0.1, 0.6)], i * 4);
-    shape.set([between(0.45, 0.8), between(0.08, 0.22), between(0, Math.PI * 2), Math.random()], i * 4);
+    const nearness = (depth + 3.5) / 5;
+    motion.set([between(-1.15, 0.95), depth, Math.random(), between(8, 14) * (1.2 - nearness * 0.3)], i * 4);
+    swing.set([between(0.3, 0.75), between(0.9, 1.6), between(0, Math.PI * 2), Math.random() < 0.35 ? between(1.5, 3) : between(0.1, 0.6)], i * 4);
+    shape.set([between(0.38, 0.68), between(0.08, 0.22), between(0, Math.PI * 2), Math.random()], i * 4);
 
     const cell = Math.floor(Math.random() * ATLAS_COLUMNS * ATLAS_ROWS);
     const column = cell % ATLAS_COLUMNS;

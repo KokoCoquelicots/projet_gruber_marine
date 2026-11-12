@@ -4,7 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs';
+import { HighlightPollutionDirective } from '../../directives/highlight-pollution.directive';
 import { Pollution, PollutionDeclaration, PollutionType } from '../../models/pollution-declaration';
+import { getPollutionDangerIndex, PollutionLevelPipe, saveCustomDangerIndex } from '../../pipes/pollution-level.pipe';
 import { PollutionService } from '../../services/pollution.service';
 import { PollutionGlobe } from '../pollution-viz/pollution-globe';
 import { findKnownPlace, geocodeLocation } from '../pollution-viz/pollution-viz-theme';
@@ -40,7 +42,7 @@ const pollutionTypes: PollutionType[] = ['Plastique', 'Chimique', 'Dépôt sauva
 
 @Component({
   selector: 'app-pollution-form',
-  imports: [PollutionGlobe, ReactiveFormsModule, RouterLink],
+  imports: [HighlightPollutionDirective, PollutionGlobe, PollutionLevelPipe, ReactiveFormsModule, RouterLink],
   templateUrl: './pollution-form.html'
 })
 export class PollutionForm {
@@ -49,6 +51,12 @@ export class PollutionForm {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly types = pollutionTypes;
+  readonly dangerPresets = [
+    { label: '0–20', value: 12 },
+    { label: '21–50', value: 35 },
+    { label: '51–100', value: 75 },
+    { label: '101+', value: 120 }
+  ] as const;
   readonly pollutionId = this.route.snapshot.paramMap.get('id');
   readonly isEditing = this.pollutionId !== null;
   readonly loading = signal(this.isEditing);
@@ -58,6 +66,8 @@ export class PollutionForm {
   readonly error = signal('');
   readonly loadFailed = signal(false);
 
+  readonly dangerIndex = signal(18);
+  private customDangerTouched = false;
   private suppressAutoGeocode = false;
   private lastAutoQuery = '';
 
@@ -85,6 +95,7 @@ export class PollutionForm {
         latitude: Number(lat),
         longitude: Number(lon),
         photoUrl: '',
+        dangerLevel: this.dangerIndex(),
         createdAt: ''
       }
     ];
@@ -110,6 +121,15 @@ export class PollutionForm {
         this.previewType.set(value.type ?? '');
         this.previewLatitude.set(value.latitude ?? null);
         this.previewLongitude.set(value.longitude ?? null);
+        if (!this.customDangerTouched) {
+          this.dangerIndex.set(
+            getPollutionDangerIndex({
+              title: value.title ?? '',
+              description: value.description ?? '',
+              type: (value.type || undefined) as PollutionType | undefined
+            })
+          );
+        }
       });
 
     // Insertion immédiate dès qu'une ville connue est saisie dans le champ Lieu
@@ -148,6 +168,14 @@ export class PollutionForm {
       });
 
     if (this.pollutionId) this.loadPollution(this.pollutionId);
+  }
+
+  /** Met à jour manuellement l'indice de dangerosité numérique (0 à 150). */
+  setDangerIndex(rawValue: string | number): void {
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) return;
+    this.customDangerTouched = true;
+    this.dangerIndex.set(Math.max(0, Math.min(150, Math.round(parsed))));
   }
 
   /** Appelé lorsque l'utilisateur clique sur la Terre 3D ou lorsqu'une ville est reconnue. */
@@ -232,6 +260,7 @@ export class PollutionForm {
       : this.pollutionService.create(declaration);
     request.subscribe({
       next: (pollution) => {
+        saveCustomDangerIndex(pollution.id, this.dangerIndex());
         this.saving.set(false);
         void this.router.navigate(['/pollutions', pollution.id]);
       },
@@ -265,6 +294,7 @@ export class PollutionForm {
           latitude: Number(pollution.latitude),
           longitude: Number(pollution.longitude)
         });
+        this.dangerIndex.set(getPollutionDangerIndex(pollution));
         this.suppressAutoGeocode = false;
         this.loading.set(false);
       },

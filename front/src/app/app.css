@@ -1076,15 +1076,93 @@ textarea.ng-touched.ng-invalid {
 	color: #39775f;
 }
 
-.pollution-card .type-tag {
+.pollution-card .type-tag,
+.danger-badge {
 	max-width: none;
-	padding: 5px 9px;
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	border: 1px solid transparent;
 	border-radius: 999px;
 	background: #eef4ec;
 	color: #2f5e4b;
 	font-size: 9px;
 	font-weight: 700;
 	letter-spacing: 0.04em;
+	transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.danger-scale-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 18px;
+	padding: 10px 14px;
+	border-radius: 10px;
+	border: 1px solid #e4ece2;
+	background: #f9fbf8;
+}
+
+.danger-scale-label {
+	color: #5b6d63;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.danger-scale-items {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.danger-control-box {
+	padding: 14px 16px;
+	border-radius: 10px;
+	border: 1px solid #e1e9df;
+	background: #f9fbf8;
+	gap: 10px;
+}
+
+.danger-control-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.danger-range {
+	height: 6px;
+	padding: 0;
+	accent-color: #39775f;
+	cursor: pointer;
+}
+
+.danger-presets {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.danger-preset-btn {
+	padding: 4px 10px;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	cursor: pointer;
+	transition: transform 160ms ease, filter 160ms ease;
+}
+
+.danger-preset-btn:hover {
+	transform: translateY(-1px);
+	filter: brightness(0.97);
 }
 
 .pollution-description {
