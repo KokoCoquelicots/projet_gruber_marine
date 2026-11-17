@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -43,7 +43,8 @@ const pollutionTypes: PollutionType[] = ['Plastique', 'Chimique', 'Dépôt sauva
 @Component({
   selector: 'app-pollution-form',
   imports: [HighlightPollutionDirective, PollutionGlobe, PollutionLevelPipe, ReactiveFormsModule, RouterLink],
-  templateUrl: './pollution-form.html'
+  templateUrl: './pollution-form.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PollutionForm {
   private readonly pollutionService = inject(PollutionService);

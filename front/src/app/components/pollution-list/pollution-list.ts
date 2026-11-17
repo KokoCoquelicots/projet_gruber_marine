@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -21,7 +21,8 @@ interface PollutionFilters {
 @Component({
   selector: 'app-pollution-list',
   imports: [DatePipe, HighlightPollutionDirective, PollutionGlobe, PollutionLevelPipe, ReactiveFormsModule, RouterLink],
-  templateUrl: './pollution-list.html'
+  templateUrl: './pollution-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PollutionList {
   private readonly pollutionService = inject(PollutionService);
