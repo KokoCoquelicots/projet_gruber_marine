@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UserRegistration } from '../../models/user';
@@ -8,7 +8,8 @@ import { UserService } from '../../services/user.service';
 @Component({
   selector: 'app-user-form',
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './user-form.html'
+  templateUrl: './user-form.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserForm {
   private readonly userService = inject(UserService);
@@ -40,7 +41,7 @@ export class UserForm {
     this.userService.create(registration).subscribe({
       next: () => {
         this.saving.set(false);
-        void this.router.navigate(['/users']);
+        void this.router.navigate(['/login']);
       },
       error: (error: HttpErrorResponse) => {
         this.error.set(error.error?.message ?? 'Impossible de créer ce compte.');

@@ -16,18 +16,24 @@ function whenIdle(task: () => void): () => void {
 }
 
 /**
- * Fond décoratif : feuilles d'automne en Three.js qui tombent derrière le contenu.
- * Three.js est chargé à la demande (chunk séparé) une fois la page affichée.
+ * Bandeau décoratif supérieur : feuilles d'automne en Three.js limitées
+ * strictement à la zone du header jusqu'au trait sous le titre (.page-hero).
  */
 @Component({
   selector: 'app-falling-leaves',
   template: '<canvas #canvas></canvas>',
   styles: `
     :host {
-      position: fixed;
-      inset: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--leaves-band-height, 232px);
       z-index: 0;
       pointer-events: none;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(180deg, #000000 0%, #000000 82%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000000 0%, #000000 82%, transparent 100%);
     }
 
     canvas {
@@ -40,13 +46,39 @@ function whenIdle(task: () => void): () => void {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FallingLeaves {
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
 
   constructor() {
     const destroyRef = inject(DestroyRef);
 
     afterNextRender(() => {
-      if (!canAnimateLeaves(window)) return;
+      // Calibre la hauteur exacte de la zone des feuilles du haut de la page jusqu'au trait sous .page-hero
+      const syncBandHeight = () => {
+        const hostEl = this.hostRef.nativeElement;
+        const heroEl = document.querySelector<HTMLElement>('.page-hero');
+        if (heroEl) {
+          const shellRect = hostEl.parentElement?.getBoundingClientRect();
+          const heroRect = heroEl.getBoundingClientRect();
+          const bottomPx = Math.max(150, Math.round(heroRect.bottom - (shellRect?.top ?? 0)));
+          hostEl.style.setProperty('--leaves-band-height', `${bottomPx}px`);
+        } else {
+          hostEl.style.setProperty('--leaves-band-height', '110px');
+        }
+      };
+
+      syncBandHeight();
+      window.addEventListener('resize', syncBandHeight, { passive: true });
+      const mutationObserver = new MutationObserver(() => syncBandHeight());
+      mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+      if (!canAnimateLeaves(window)) {
+        destroyRef.onDestroy(() => {
+          window.removeEventListener('resize', syncBandHeight);
+          mutationObserver.disconnect();
+        });
+        return;
+      }
 
       let dispose: (() => void) | undefined;
       let destroyed = false;
@@ -54,16 +86,18 @@ export class FallingLeaves {
         try {
           const { LeavesScene } = await import('./leaves-scene');
           if (destroyed) return;
+          syncBandHeight();
           const scene = new LeavesScene(this.canvas().nativeElement);
           dispose = () => scene.dispose();
         } catch (error) {
-          // WebGL indisponible : le site reste parfaitement utilisable, sans animation.
           console.warn('Animation des feuilles désactivée :', error);
         }
       });
 
       destroyRef.onDestroy(() => {
         destroyed = true;
+        window.removeEventListener('resize', syncBandHeight);
+        mutationObserver.disconnect();
         cancelIdle();
         dispose?.();
       });

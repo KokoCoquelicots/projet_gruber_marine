@@ -1,6 +1,6 @@
-# TP 04 — Vigie
+# TP 05 — Vigie
 
-Application Angular de signalement de pollutions, connectée à une API REST Node.js utilisant Sequelize et PostgreSQL. Elle permet de gérer les signalements et les utilisateurs, avec une authentification pédagogique.
+Application Angular de signalement de pollutions, connectée à une API REST Node.js utilisant Sequelize et PostgreSQL. Elle permet de gérer les signalements et les utilisateurs, avec une authentification pédagogique, des routes chargées à la demande et des guards côté client.
 
 ## Lancement
 
@@ -28,11 +28,11 @@ Au premier démarrage, l’API crée la table des utilisateurs et la table `poll
 
 - `GET /api/users` et `POST /api/users` : lister et créer des utilisateurs.
 - `DELETE /api/users/:id` : supprimer un utilisateur.
-- `POST /api/users/authenticate` : vérifier les identifiants (authentification fictive, sans session ni protection des routes).
+- `POST /api/users/authenticate` : vérifier les identifiants (authentification pédagogique, sans session côté serveur).
 - `GET /api/pollutions` et `GET /api/pollutions/:id` : consulter les signalements.
 - `POST /api/pollutions`, `PUT /api/pollutions/:id` et `DELETE /api/pollutions/:id` : gérer les signalements.
 
-Les mots de passe sont hachés avec `scrypt` et ne sont jamais renvoyés par l’API. L’authentification est uniquement pédagogique et ne doit pas être utilisée comme contrôle d’accès en production.
+Les mots de passe sont hachés avec `scrypt` et ne sont jamais renvoyés par l’API. Les guards Angular protègent la navigation vers les pages de gestion, mais la connexion reste uniquement pédagogique : elle ne crée pas de session serveur et ne constitue pas un contrôle d’accès sécurisé pour l’API ou la production.
 
 ## Tests et production
 

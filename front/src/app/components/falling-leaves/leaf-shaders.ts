@@ -60,7 +60,7 @@ export const leafVertexShader = /* glsl */ `
 
     vUv = (uv * uAtlasCell) + aUvOffset;
     vNormal = rotation * normal;
-    vNearness = smoothstep(-7.0, 3.0, depth);
+    vNearness = smoothstep(-3.5, 1.5, depth);
     vTint = aShape.w;
   }
 `;

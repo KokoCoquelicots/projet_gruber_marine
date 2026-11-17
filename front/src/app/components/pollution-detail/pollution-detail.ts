@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, of, tap } from 'rxjs';
@@ -12,7 +12,8 @@ import { PollutionGlobe } from '../pollution-viz/pollution-globe';
 @Component({
   selector: 'app-pollution-detail',
   imports: [DatePipe, PollutionGlobe, PollutionSummary, RouterLink],
-  templateUrl: './pollution-detail.html'
+  templateUrl: './pollution-detail.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PollutionDetail {
   private readonly pollutionService = inject(PollutionService);

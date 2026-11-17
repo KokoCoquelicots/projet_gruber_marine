@@ -1,18 +1,28 @@
 import { Routes } from '@angular/router';
-import { PollutionDetail } from './components/pollution-detail/pollution-detail';
-import { PollutionForm } from './components/pollution-form/pollution-form';
-import { PollutionList } from './components/pollution-list/pollution-list';
-import { Login } from './components/login/login';
-import { UserForm } from './components/user-form/user-form';
-import { UserList } from './components/user-list/user-list';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: PollutionList },
-  { path: 'login', component: Login },
-  { path: 'users', component: UserList },
-  { path: 'users/new', component: UserForm },
-  { path: 'pollutions/new', component: PollutionForm },
-  { path: 'pollutions/:id/edit', component: PollutionForm },
-  { path: 'pollutions/:id', component: PollutionDetail },
+  { path: '', loadComponent: () => import('./components/pollution-list/pollution-list').then((module) => module.PollutionList) },
+  { path: 'login', loadComponent: () => import('./components/login/login').then((module) => module.Login) },
+  { path: 'users/new', loadComponent: () => import('./components/user-form/user-form').then((module) => module.UserForm) },
+  {
+    path: 'users',
+    canActivate: [authGuard],
+    loadComponent: () => import('./components/user-list/user-list').then((module) => module.UserList)
+  },
+  {
+    path: 'pollutions/new',
+    canActivate: [authGuard],
+    loadComponent: () => import('./components/pollution-form/pollution-form').then((module) => module.PollutionForm)
+  },
+  {
+    path: 'pollutions/:id/edit',
+    canActivate: [authGuard],
+    loadComponent: () => import('./components/pollution-form/pollution-form').then((module) => module.PollutionForm)
+  },
+  {
+    path: 'pollutions/:id',
+    loadComponent: () => import('./components/pollution-detail/pollution-detail').then((module) => module.PollutionDetail)
+  },
   { path: '**', redirectTo: '' }
 ];

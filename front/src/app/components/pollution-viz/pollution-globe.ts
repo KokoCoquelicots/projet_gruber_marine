@@ -15,7 +15,9 @@ import {
   viewChild
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HighlightPollutionDirective } from '../../directives/highlight-pollution.directive';
 import { Pollution } from '../../models/pollution-declaration';
+import { getPollutionDangerIndex, PollutionLevelPipe } from '../../pipes/pollution-level.pipe';
 import { canAnimateLeaves } from '../falling-leaves/falling-leaves';
 import type { GlobeScene } from './globe-scene';
 import { formatCoordinates, getPollutionTheme } from './pollution-viz-theme';
@@ -30,7 +32,7 @@ registerLocaleData(localeFr);
  */
 @Component({
   selector: 'app-pollution-globe',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, HighlightPollutionDirective, PollutionLevelPipe, RouterLink],
   template: `
     <div class="globe-shell">
       <div class="globe-top-meta">
@@ -100,7 +102,12 @@ registerLocaleData(localeFr);
         @if (activeItem(); as item) {
           <div class="globe-detail-card">
             <div class="globe-detail-top">
-              <span class="globe-detail-type">{{ item.type }}</span>
+              <div class="globe-detail-badges">
+                <span class="globe-detail-type">{{ item.type }}</span>
+                <span class="globe-danger-badge" [appHighlightPollution]="activeDangerIndex()">
+                  Indice {{ activeDangerIndex() }} · {{ activeDangerIndex() | pollutionLevel }}
+                </span>
+              </div>
               <span class="globe-target-coords">{{ activeCoords() }}</span>
             </div>
 
@@ -271,16 +278,26 @@ registerLocaleData(localeFr);
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .globe-detail-type {
+    .globe-detail-badges {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .globe-detail-type,
+    .globe-danger-badge {
       padding: 2px 7px;
-      border-radius: 4px;
+      border-radius: 999px;
+      border: 1px solid transparent;
       background: #eaf1e8;
       color: #2c5443;
       font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
@@ -371,6 +388,7 @@ export class PollutionGlobe {
 
   readonly activeTheme = computed(() => getPollutionTheme(this.activeItem()?.type));
   readonly activePrimary = computed(() => this.activeTheme().primaryHex);
+  readonly activeDangerIndex = computed(() => getPollutionDangerIndex(this.activeItem()));
   readonly activeCoords = computed(() => {
     const item = this.activeItem();
     return item ? formatCoordinates(item.latitude, item.longitude) : '';

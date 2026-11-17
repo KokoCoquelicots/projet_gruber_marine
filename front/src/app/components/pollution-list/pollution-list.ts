@@ -1,11 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, of, startWith, Subject, switchMap, tap } from 'rxjs';
+import { HighlightPollutionDirective } from '../../directives/highlight-pollution.directive';
 import { Pollution, PollutionType } from '../../models/pollution-declaration';
+import { getPollutionDangerIndex, PollutionLevelPipe } from '../../pipes/pollution-level.pipe';
 import { PollutionService } from '../../services/pollution.service';
 import { PollutionGlobe } from '../pollution-viz/pollution-globe';
 
@@ -18,13 +20,20 @@ interface PollutionFilters {
 
 @Component({
   selector: 'app-pollution-list',
-  imports: [DatePipe, PollutionGlobe, ReactiveFormsModule, RouterLink],
-  templateUrl: './pollution-list.html'
+  imports: [DatePipe, HighlightPollutionDirective, PollutionGlobe, PollutionLevelPipe, ReactiveFormsModule, RouterLink],
+  templateUrl: './pollution-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PollutionList {
   private readonly pollutionService = inject(PollutionService);
   private readonly refresh = new Subject<void>();
   readonly types: PollutionType[] = ['Plastique', 'Chimique', 'Dépôt sauvage', 'Eau', 'Air', 'Autre'];
+  readonly dangerScale = [
+    { sampleIndex: 10, range: '0–20' },
+    { sampleIndex: 35, range: '21–50' },
+    { sampleIndex: 75, range: '51–100' },
+    { sampleIndex: 120, range: '101+' }
+  ] as const;
   readonly loading = signal(true);
   readonly error = signal('');
   readonly hoveredPollutionId = signal<string | null>(null);
@@ -83,6 +92,10 @@ export class PollutionList {
         dateTo: value.dateTo ?? ''
       });
     });
+  }
+
+  dangerIndex(pollution: Pollution): number {
+    return getPollutionDangerIndex(pollution);
   }
 
   focusPollution(id: string | null): void {
