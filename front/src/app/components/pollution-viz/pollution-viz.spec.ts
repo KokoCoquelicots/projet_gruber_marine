@@ -94,6 +94,36 @@ describe('Pollution 3D globe & automatic city geocoding', () => {
     expect(host.querySelector('.globe-target-title')?.textContent).toContain('Rejet chimique dans le canal');
   });
 
+  it('exposes satellite view toggle and precision zoom controls on the 3D globe', () => {
+    TestBed.configureTestingModule({
+      imports: [PollutionGlobe],
+      providers: [provideRouter([])]
+    });
+
+    const fixture = TestBed.createComponent(PollutionGlobe);
+    fixture.componentRef.setInput('pollutions', samplePollutions);
+    fixture.detectChanges();
+
+    const host: HTMLElement = fixture.nativeElement;
+    const badge = host.querySelector('.globe-badge');
+    const satBtn = host.querySelector('button[aria-label="Vue satellite"]') as HTMLButtonElement | null;
+    const preciseBtn = host.querySelector('button[aria-label="Zoom précis"]') as HTMLButtonElement | null;
+
+    expect(badge?.textContent).toContain('GLOBE TERRESTRE 3D');
+    expect(satBtn).not.toBeNull();
+    expect(preciseBtn).not.toBeNull();
+
+    fixture.componentInstance.toggleSatelliteView();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isSatellite()).toBe(true);
+    expect(badge?.textContent).toContain('VUE SATELLITE HD');
+    expect(satBtn?.classList.contains('is-active')).toBe(true);
+
+    fixture.componentInstance.toggleSatelliteView();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isSatellite()).toBe(false);
+  });
+
   it('automatically inserts latitude and longitude when typing a city in PollutionForm', () => {
     TestBed.configureTestingModule({
       imports: [PollutionForm],

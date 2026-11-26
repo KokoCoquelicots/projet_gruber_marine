@@ -19,16 +19,16 @@ import { HighlightPollutionDirective } from '../../directives/highlight-pollutio
 import { Pollution } from '../../models/pollution-declaration';
 import { getPollutionDangerIndex, PollutionLevelPipe } from '../../pipes/pollution-level.pipe';
 import { canAnimateLeaves } from '../falling-leaves/falling-leaves';
-import type { GlobeScene } from './globe-scene';
+import type { GlobeScene, GlobeViewMode } from './globe-scene';
 import { formatCoordinates, getPollutionTheme } from './pollution-viz-theme';
 
 registerLocaleData(localeFr);
 
 /**
  * Globe Terrestre 3D réaliste et interactif sans cadre :
- * - Affiche la sphère terrestre entière flottante avec ses boutons de contrôle sur le côté.
+ * - Passage automatique en vue satellite HD dès que l'utilisateur zoome sur une région.
+ * - Zoom logarithmique ultra-précis (molette, boutons +/- ou bouton Précis) et bascule Sat manuelle.
  * - Chaque déclaration de la base de données est représentée par un trait lumineux à ses coordonnées GPS.
- * - Permet un zoom haute précision (molette ou boutons +/-) et la sélection directe d'un trait.
  */
 @Component({
   selector: 'app-pollution-globe',
@@ -38,7 +38,7 @@ registerLocaleData(localeFr);
       <div class="globe-top-meta">
         <span class="globe-badge">
           <span class="globe-dot" [style.background]="activePrimary()"></span>
-          GLOBE TERRESTRE 3D
+          {{ isSatellite() ? 'VUE SATELLITE HD' : 'GLOBE TERRESTRE 3D' }} · ×{{ zoomFactor() }}
         </span>
         <span class="globe-count">{{ pollutions().length }} signalement(s)</span>
       </div>
@@ -53,7 +53,7 @@ registerLocaleData(localeFr);
             class="globe-ctrl-btn"
             type="button"
             (click)="zoomIn()"
-            title="Zoomer sur le globe"
+            title="Zoomer avec précision sur le globe"
             aria-label="Zoomer"
           >+</button>
           <button
@@ -63,6 +63,27 @@ registerLocaleData(localeFr);
             title="Dézoomer"
             aria-label="Dézoomer"
           >−</button>
+          <button
+            class="globe-ctrl-btn globe-ctrl-text"
+            type="button"
+            [class.is-active]="isSatellite() || viewMode() === 'satellite'"
+            (click)="toggleSatelliteView()"
+            title="Basculer entre la vue satellite et la carte"
+            aria-label="Vue satellite"
+          >
+            Sat
+          </button>
+          @if (activeItem()) {
+            <button
+              class="globe-ctrl-btn globe-ctrl-text"
+              type="button"
+              (click)="focusPrecise()"
+              title="Zoomer en haute précision sur le signalement actif"
+              aria-label="Zoom précis"
+            >
+              Précis
+            </button>
+          }
           @if (pollutions().length > 1) {
             <button
               class="globe-ctrl-btn"
@@ -92,9 +113,9 @@ registerLocaleData(localeFr);
 
       <p class="globe-caption">
         @if (pickable()) {
-          Cliquez sur le globe ou saisissez une ville pour placer le point
+          Zoomez pour passer en vue satellite · Cliquez sur le globe pour placer le point
         } @else if (pollutions().length > 0) {
-          Molette ou +/- pour zoomer · Cliquez sur un trait pour le détail
+          Molette ou +/- pour zoomer en vue satellite · Cliquez sur un trait pour le détail
         }
       </p>
 
@@ -221,8 +242,8 @@ registerLocaleData(localeFr);
     }
 
     .globe-ctrl-btn {
-      min-width: 34px;
-      height: 34px;
+      min-width: 38px;
+      height: 32px;
       padding: 0 8px;
       display: inline-flex;
       align-items: center;
@@ -250,6 +271,12 @@ registerLocaleData(localeFr);
       border-color: #39775f;
       color: #173b34;
       transform: translateY(-1px);
+    }
+
+    .globe-ctrl-btn.is-active {
+      background: #234d3e;
+      border-color: #234d3e;
+      color: #ffffff;
     }
 
     .globe-caption {
@@ -366,6 +393,9 @@ export class PollutionGlobe {
 
   readonly clickedId = signal<string | null>(null);
   readonly isOverview = signal(false);
+  readonly isSatellite = signal(false);
+  readonly viewMode = signal<GlobeViewMode>('auto');
+  readonly zoomFactor = signal(1);
 
   readonly effectiveSelectedId = computed(() => {
     const list = this.pollutions();
@@ -421,7 +451,12 @@ export class PollutionGlobe {
               ? (coords) => {
                   this.coordinatesPicked.emit(coords);
                 }
-              : undefined
+              : undefined,
+            onViewStateChange: (state) => {
+              this.isSatellite.set(state.isSatellite);
+              this.zoomFactor.set(state.zoomLevel);
+              this.viewMode.set(state.mode);
+            }
           });
           this.scene.setPollutions(this.pollutions(), this.effectiveSelectedId(), true);
         })
@@ -451,11 +486,36 @@ export class PollutionGlobe {
 
   zoomIn(): void {
     this.isOverview.set(false);
-    this.scene?.zoomBy(-0.45);
+    this.scene?.zoomBy(-1);
   }
 
   zoomOut(): void {
-    this.scene?.zoomBy(0.45);
+    this.scene?.zoomBy(1);
+  }
+
+  toggleSatelliteView(): void {
+    if (this.scene) {
+      const nextMode = this.scene.toggleSatellite();
+      this.viewMode.set(nextMode);
+      if (nextMode === 'satellite') {
+        this.isSatellite.set(true);
+      } else if (nextMode === 'map') {
+        this.isSatellite.set(false);
+      }
+      return;
+    }
+
+    // Mode sans WebGL (tests unitaires)
+    const nextSat = !this.isSatellite();
+    this.isSatellite.set(nextSat);
+    this.viewMode.set(nextSat ? 'satellite' : 'map');
+  }
+
+  focusPrecise(): void {
+    const item = this.activeItem();
+    if (!item || !this.scene) return;
+    this.isOverview.set(false);
+    this.scene.focusSatellitePrecision(item.latitude, item.longitude);
   }
 
   toggleOverview(): void {
