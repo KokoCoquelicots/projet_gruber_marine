@@ -1,13 +1,17 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { Store } from '@ngxs/store';
+import { AuthState } from '../store/auth.state';
 
 export const authGuard: CanActivateFn = (_route, state) => {
-  if (inject(AuthService).currentUser()) {
+  const store = inject(Store);
+  const router = inject(Router);
+
+  if (store.selectSnapshot(AuthState.isAuthenticated)) {
     return true;
   }
 
-  return inject(Router).createUrlTree(['/login'], {
+  return router.createUrlTree(['/login'], {
     queryParams: { returnUrl: state.url }
   });
 };

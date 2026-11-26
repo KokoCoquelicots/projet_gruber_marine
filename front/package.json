@@ -17,6 +17,8 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@ngxs/storage-plugin": "^22.0.0",
+    "@ngxs/store": "^22.0.0",
     "rxjs": "~7.8.0",
     "three": "^0.187.0",
     "topojson-client": "^3.1.0",

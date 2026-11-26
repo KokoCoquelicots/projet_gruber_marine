@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, HostListener, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Store } from '@ngxs/store';
 import { FallingLeaves } from './components/falling-leaves/falling-leaves';
-import { AuthService } from './services/auth.service';
+import { Logout } from './store/auth.actions';
+import { AuthState } from './store/auth.state';
 
 @Component({
   selector: 'app-root',
   imports: [FallingLeaves, RouterLink, RouterLinkActive, RouterOutlet],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="site-shell">
       <div class="nature-backdrop" aria-hidden="true">
@@ -42,12 +43,12 @@ import { AuthService } from './services/auth.service';
           </nav>
 
           <div class="topbar-actions">
-            @if (auth.currentUser(); as user) {
-              <div class="user-chip" title="{{ user.email }}">
-                <span class="user-avatar" aria-hidden="true">{{ user.name.slice(0, 1).toUpperCase() }}</span>
-                <span class="signed-in">Bonjour, <strong>{{ user.name }}</strong></span>
+            @if (isAuthenticated()) {
+              <div class="user-chip" [title]="user()?.email ?? ''">
+                <span class="user-avatar" aria-hidden="true">{{ (username() || 'V').slice(0, 1).toUpperCase() }}</span>
+                <span class="signed-in">Bonjour, <strong>{{ username() }}</strong></span>
               </div>
-              <button class="topbar-ghost-btn" type="button" (click)="auth.logout()">
+              <button class="topbar-ghost-btn" type="button" (click)="logout()">
                 Déconnexion
               </button>
             } @else {
@@ -77,8 +78,18 @@ import { AuthService } from './services/auth.service';
   `
 })
 export class App {
-  readonly auth = inject(AuthService);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+
+  readonly isAuthenticated = this.store.selectSignal(AuthState.isAuthenticated);
+  readonly username = this.store.selectSignal(AuthState.username);
+  readonly user = this.store.selectSignal(AuthState.user);
   readonly scrolled = signal(false);
+
+  logout(): void {
+    this.store.dispatch(new Logout());
+    void this.router.navigate(['/']);
+  }
 
   @HostListener('window:scroll')
   onWindowScroll(): void {

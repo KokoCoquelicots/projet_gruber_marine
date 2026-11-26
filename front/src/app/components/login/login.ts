@@ -1,8 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { Store } from '@ngxs/store';
+import { Login as LoginAction, Logout } from '../../store/auth.actions';
+import { AuthState } from '../../store/auth.state';
 
 @Component({
   selector: 'app-login',
@@ -11,33 +12,59 @@ import { AuthService } from '../../services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Login {
-  private readonly auth = inject(AuthService);
+  private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  readonly submitting = signal(false);
-  readonly error = signal('');
+
+  readonly isAuthenticated = this.store.selectSignal(AuthState.isAuthenticated);
+  readonly username = this.store.selectSignal(AuthState.username);
+  readonly user = this.store.selectSignal(AuthState.user);
+
+  readonly simulatedProfiles = [
+    { nom: 'Marine Gruber', email: 'marine.gruber@vigie.fr', role: 'Observatrice' },
+    { nom: 'Camille Verdier', email: 'camille.verdier@vigie.fr', role: 'Coordinatrice' }
+  ] as const;
+
   readonly loginForm = new FormGroup({
-    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
-    password: new FormControl('', { nonNullable: true, validators: [Validators.required] })
+    nom: new FormControl('Marine Gruber', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(100)]
+    }),
+    email: new FormControl('marine.gruber@vigie.fr', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email]
+    })
   });
+
+  selectProfile(profile: { nom: string; email: string }): void {
+    this.loginForm.setValue({
+      nom: profile.nom,
+      email: profile.email
+    });
+  }
 
   submit(): void {
     this.loginForm.markAllAsTouched();
     if (this.loginForm.invalid) return;
 
-    this.submitting.set(true);
-    this.error.set('');
-    this.auth.login(this.loginForm.getRawValue()).subscribe({
-      next: () => {
-        this.submitting.set(false);
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
-        void this.router.navigateByUrl(destination);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.error.set(error.error?.message ?? 'Impossible de se connecter.');
-        this.submitting.set(false);
-      }
-    });
+    const { email, nom } = this.loginForm.getRawValue();
+    this.store.dispatch(new LoginAction({ email, nom }));
+
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
+    void this.router.navigateByUrl(destination);
+  }
+
+  quickLogin(profile: { nom: string; email: string; role?: string } = this.simulatedProfiles[0]): void {
+    this.selectProfile(profile);
+    this.store.dispatch(new LoginAction({ email: profile.email, nom: profile.nom, role: profile.role }));
+
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
+    void this.router.navigateByUrl(destination);
+  }
+
+  logout(): void {
+    this.store.dispatch(new Logout());
   }
 }
