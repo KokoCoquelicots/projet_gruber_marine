@@ -1,17 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly submitting = signal(false);
   readonly error = signal('');
   readonly loginForm = new FormGroup({
@@ -28,7 +30,9 @@ export class Login {
     this.auth.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.submitting.set(false);
-        void this.router.navigate(['/']);
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        const destination = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/';
+        void this.router.navigateByUrl(destination);
       },
       error: (error: HttpErrorResponse) => {
         this.error.set(error.error?.message ?? 'Impossible de se connecter.');

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { User } from '../../models/user';
 import { UserService } from '../../services/user.service';
@@ -8,7 +8,8 @@ import { UserService } from '../../services/user.service';
 @Component({
   selector: 'app-user-list',
   imports: [DatePipe, RouterLink],
-  templateUrl: './user-list.html'
+  templateUrl: './user-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserList {
   private readonly userService = inject(UserService);

@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FallingLeaves } from './components/falling-leaves/falling-leaves';
 import { AuthService } from './services/auth.service';
@@ -6,6 +6,7 @@ import { AuthService } from './services/auth.service';
 @Component({
   selector: 'app-root',
   imports: [FallingLeaves, RouterLink, RouterLinkActive, RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="site-shell">
       <div class="nature-backdrop" aria-hidden="true">

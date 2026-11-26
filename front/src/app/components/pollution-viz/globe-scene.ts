@@ -342,12 +342,13 @@ export class GlobeScene {
         color: new Color(theme.accentHex),
         side: DoubleSide,
         transparent: true,
-        opacity: 0.88,
+        opacity: isSelected ? 0.88 : 0,
         depthWrite: false
       });
       const ringMesh = new Mesh(this.ringGeometry, ringMaterial);
       ringMesh.rotation.x = Math.PI / 2;
       ringMesh.position.y = 0.004;
+      ringMesh.visible = isSelected;
       holder.add(ringMesh);
 
       const hitMaterial = new MeshBasicMaterial({ visible: false });
@@ -503,19 +504,31 @@ export class GlobeScene {
     const zoomScale = Math.min(1.1, Math.max(0.26, (this.currentCameraZ - GLOBE_RADIUS) / 1.55));
 
     for (const handle of this.spikeHandles) {
-      const pulse = 1 + (handle.isSelected ? 0.12 : 0.05) * Math.sin(elapsed * 3.0 + handle.phase);
-      const h = handle.baseHeight * pulse * zoomScale;
-      const thickness = (handle.isSelected ? 1.32 : 0.95) * zoomScale;
+      if (handle.isSelected) {
+        const pulse = 1 + 0.12 * Math.sin(elapsed * 3.0 + handle.phase);
+        const h = handle.baseHeight * pulse * zoomScale;
+        const thickness = 1.32 * zoomScale;
 
-      handle.spikeMesh.scale.set(thickness, h, thickness);
-      handle.tipMesh.position.y = h;
-      handle.tipMesh.scale.setScalar((handle.isSelected ? 1.2 : 0.85) * zoomScale);
-      handle.hitMesh.scale.set(zoomScale, h + 0.06 * zoomScale, zoomScale);
+        handle.spikeMesh.scale.set(thickness, h, thickness);
+        handle.tipMesh.position.y = h;
+        handle.tipMesh.scale.setScalar(1.2 * zoomScale);
+        handle.hitMesh.scale.set(zoomScale, h + 0.06 * zoomScale, zoomScale);
 
-      const cycle = (elapsed * (handle.isSelected ? 1.0 : 0.6) + handle.phase) % 1;
-      const ringScale = (1 + cycle * (handle.isSelected ? 3.1 : 1.9)) * zoomScale;
-      handle.ringMesh.scale.setScalar(ringScale);
-      handle.ringMaterial.opacity = (1 - cycle) * (handle.isSelected ? 0.9 : 0.55);
+        handle.ringMesh.visible = true;
+        const cycle = (elapsed + handle.phase) % 1;
+        const ringScale = (1 + cycle * 3.1) * zoomScale;
+        handle.ringMesh.scale.setScalar(ringScale);
+        handle.ringMaterial.opacity = (1 - cycle) * 0.9;
+      } else {
+        const h = handle.baseHeight * zoomScale;
+        const thickness = 0.95 * zoomScale;
+
+        handle.spikeMesh.scale.set(thickness, h, thickness);
+        handle.tipMesh.position.y = h;
+        handle.tipMesh.scale.setScalar(0.85 * zoomScale);
+        handle.hitMesh.scale.set(zoomScale, h + 0.06 * zoomScale, zoomScale);
+        handle.ringMesh.visible = false;
+      }
     }
 
     this.renderer.render(this.scene, this.camera);
